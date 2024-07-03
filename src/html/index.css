@@ -1,0 +1,33 @@
+* {
+   margin: 0;
+   padding: 0;
+   box-sizing: border-box;
+}
+
+body {
+   color: rgb(0, 0, 0);
+   width: 100dvw;
+   overflow-x: hidden;
+   height: 100%;
+   background: #ffffff;
+   border-color: #3b3b3b;
+   user-select: none;
+}
+
+canvas {
+   position: absolute;
+   width: 100%;
+   height: 100%;
+   background-color: black;
+}
+
+.screen-max-width {
+   margin-inline-start: auto;
+   margin-inline-end: auto;
+   position: relative;
+   max-width: 1120px;
+}
+::-webkit-scrollbar {
+   width: 0px;
+   height: 0px;
+}
