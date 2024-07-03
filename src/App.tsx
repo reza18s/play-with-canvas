@@ -1,21 +1,15 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Canvas from "./Canvas";
 
 export default function App() {
    const [canv, setCanv] = useState<HTMLCanvasElement | null>(null);
-   // const [size, setSize] = useState({
-   //    width: window.innerWidth,
-   //    height: window.innerHeight,
-   // });
-
+   console.log(canv);
    console.log(canv);
    return (
       <div className="h-screen w-screen">
          <canvas
             className="myCanvas absolute h-screen  w-screen bg-black"
             ref={(ref) => setCanv(ref)}
-            // height={size.height}
-            // width={size.width}
          ></canvas>
          {canv && <Canvas canv={canv} setCanv={setCanv}></Canvas>}
       </div>
