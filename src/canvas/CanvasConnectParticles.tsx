@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Hooks } from "./Hooks";
+import { Hooks } from "../Hooks";
 
 export default function Canvas({
   canv,

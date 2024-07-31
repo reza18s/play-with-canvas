@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Hooks } from "./Hooks";
+import { Hooks } from "../Hooks";
 
 class Particle {
   x: number = 0;

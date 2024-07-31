@@ -12,4 +12,13 @@ export const Hooks = {
       return () => window.removeEventListener("resize", resizeHandler);
     }, []);
   },
+  addEventListener: (
+    type: "click" | "keydown" | "keyup",
+    handler: (event: any) => void,
+  ) => {
+    useEffect(() => {
+      addEventListener(type, handler);
+      return () => document.removeEventListener(type, handler);
+    }, []);
+  },
 };

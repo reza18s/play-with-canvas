@@ -1,6 +1,6 @@
 import { useEffect } from "react";
-import { base64url } from "./context";
-import { Hooks } from "./Hooks";
+import { base64url } from "../context";
+import { Hooks } from "../Hooks";
 
 export default function Canvas({
   canv,
@@ -45,7 +45,6 @@ export default function Canvas({
     let imageHeight = userImage.height;
     const data = ctx?.getImageData(0, 0, imageWidth, imageHeight);
     ctx?.clearRect(0, 0, canv!.width, canv!.height);
-    console.log(data?.data);
     class Particle {
       x: number = 0;
       y: number = 0;
@@ -118,6 +117,7 @@ export default function Canvas({
             ParticleArray.push(particle);
           }
         }
+        console.log(ParticleArray);
       }
       const animation = () => {
         ctx?.clearRect(0, 0, canv!.width, canv!.height);
