@@ -13,7 +13,7 @@ export const Hooks = {
     }, []);
   },
   addEventListener: (
-    type: "click" | "keydown" | "keyup",
+    type: "click" | "keydown" | "keyup" | "mousedown" | "mouseup",
     handler: (event: any) => void,
   ) => {
     useEffect(() => {
