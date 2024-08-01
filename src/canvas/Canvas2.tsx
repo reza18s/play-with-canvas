@@ -41,8 +41,8 @@ export default function Canvas({
     drawImage();
   };
   const drawImage = () => {
-    let imageWidth = userImage.width;
-    let imageHeight = userImage.height;
+    const imageWidth = userImage.width;
+    const imageHeight = userImage.height;
     const data = ctx?.getImageData(0, 0, imageWidth, imageHeight);
     ctx?.clearRect(0, 0, canv!.width, canv!.height);
     class Particle {
@@ -65,27 +65,27 @@ export default function Canvas({
       }
       update() {
         ctx!.fillStyle = this.color;
-        let dx = mouse.x - this.x;
-        let dy = mouse.y - this.y;
-        let distance = Math.sqrt(dx * dx + dy * dy);
-        let forceDirectionX = (dx / distance) * -1;
-        let forceDirectionY = (dy / distance) * -1;
+        const dx = mouse.x - this.x;
+        const dy = mouse.y - this.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        const forceDirectionX = (dx / distance) * -1;
+        const forceDirectionY = (dy / distance) * -1;
         const maxDistance = 1000;
         let force = (maxDistance - distance) / maxDistance;
         if (force > 0.9) force = 0;
-        let directionX = forceDirectionX * force * this.destiny;
-        let directionY = forceDirectionY * force * this.destiny;
+        const directionX = forceDirectionX * force * this.destiny;
+        const directionY = forceDirectionY * force * this.destiny;
         // console.log(directionX, directionY);
         if (distance < mouse.radius + this.size) {
           this.x += directionX;
           this.y += directionY;
         } else {
           if (this.x !== this.baseX) {
-            let dx = this.x - this.baseX;
+            const dx = this.x - this.baseX;
             this.x -= dx / 30;
           }
           if (this.y !== this.baseY) {
-            let dy = this.y - this.baseY;
+            const dy = this.y - this.baseY;
             this.y -= dy / 30;
           }
         }

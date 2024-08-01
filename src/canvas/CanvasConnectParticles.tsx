@@ -53,16 +53,16 @@ export default function Canvas({
     }
     update() {
       ctx!.fillStyle = this.color;
-      let dx = mouse.x - this.x;
-      let dy = mouse.y - this.y;
-      let distance = Math.sqrt(dx * dx + dy * dy);
-      let forceDirectionX = dx / distance;
-      let forceDirectionY = dy / distance;
+      const dx = mouse.x - this.x;
+      const dy = mouse.y - this.y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      const forceDirectionX = dx / distance;
+      const forceDirectionY = dy / distance;
       const maxDistance = 300;
       let force = (maxDistance - distance) / maxDistance;
       if (force > 1) force = 0;
-      let directionX = forceDirectionX * force * this.destiny;
-      let directionY = forceDirectionY * force * this.destiny;
+      const directionX = forceDirectionX * force * this.destiny;
+      const directionY = forceDirectionY * force * this.destiny;
       // console.log(directionX, directionY);
       if (distance < mouse.radius + this.size) {
         this.x -= directionX;
@@ -89,9 +89,9 @@ export default function Canvas({
       return this;
     }
     connect(x: number, y: number, defaultAlpha?: number) {
-      let dx = x - this.x;
-      let dy = y - this.y;
-      let distance = Math.sqrt(dx * dx + dy * dy);
+      const dx = x - this.x;
+      const dy = y - this.y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
       const maxDistance = 200;
       let alpha = (maxDistance - distance) / maxDistance;
 

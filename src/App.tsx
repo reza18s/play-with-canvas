@@ -1,21 +1,34 @@
-import { useEffect, useState } from "react";
-import Canvas from "./board/Squer";
+import { useState } from "react";
+import Canvas from "./board/Square";
+import { ICanvasType } from "./types/types";
 export default function App() {
   const [canv, setCanv] = useState<HTMLCanvasElement | null>(null);
+  const [canvasType, setCanvasType] = useState<ICanvasType>("move");
   return (
     <div className="h-screen w-screen">
       <canvas
-        className="myCanvas absolute -z-10  h-screen w-screen bg-black"
+        className=" absolute -z-10  h-screen w-screen bg-black"
         ref={(ref) => setCanv(ref)}
         width={window.innerWidth}
         height={window.innerHeight}
       ></canvas>
-      {/* <div className="flex h-screen w-full items-center justify-center bg-transparent text-center text-9xl font-semibold">
-        <h1 className=" border-t-2 border-white" id="text">
-          Fuck u
-        </h1>
-      </div> */}
-      {canv && <Canvas canv={canv} setCanv={setCanv}></Canvas>}
+      <div className="">
+        <button
+          onClick={() => {
+            setCanvasType("square");
+          }}
+        >
+          square
+        </button>
+      </div>
+      {canv && (
+        <Canvas
+          canv={canv}
+          setCanv={setCanv}
+          canvasType={canvasType}
+          setCanvasType={setCanvasType}
+        ></Canvas>
+      )}
     </div>
   );
 }

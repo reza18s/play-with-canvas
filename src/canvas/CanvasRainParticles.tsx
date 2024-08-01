@@ -1,4 +1,3 @@
-import { useRef } from "react";
 import { Hooks } from "../Hooks";
 
 class Particle {
@@ -61,6 +60,7 @@ export default function Canvas({
 }) {
   const ctx = canv?.getContext("2d");
   const text = document.getElementById("text");
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   let hue = 0;
   canv!.width = window.innerWidth;
   canv!.height = window.innerHeight;

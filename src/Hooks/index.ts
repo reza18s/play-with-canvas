@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect } from "react";
 
 export const Hooks = {
@@ -12,13 +13,14 @@ export const Hooks = {
       return () => window.removeEventListener("resize", resizeHandler);
     }, []);
   },
-  addEventListener: (
-    type: "click" | "keydown" | "keyup" | "mousedown" | "mouseup",
+  useAddEventListener: (
+    type: "click" | "keydown" | "keyup" | "mousedown" | "mouseup" | "mousemove",
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     handler: (event: any) => void,
   ) => {
     useEffect(() => {
-      addEventListener(type, handler);
-      return () => document.removeEventListener(type, handler);
+      window.addEventListener(type, handler);
+      return () => window.removeEventListener(type, handler);
     }, []);
   },
 };

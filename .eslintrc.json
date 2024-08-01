@@ -1,21 +1,38 @@
 {
-   "settings": {
-      "react": {
-         "version": "detect"
-      }
-   },
-   "extends": [
-      "standard",
-      "plugin:react/recommended",
-      "plugin:tailwindcss/recommended",
-      "prettier"
-   ],
-   "rules": {
-      "max-len": [2, 250],
-      "no-multiple-empty-lines": ["error", { "max": 1, "maxEOF": 1 }],
-      "object-curly-newline": 0,
-      "react/react-in-jsx-scope": "off",
-      "no-unused-vars": "warn",
-      "react/prop-types": 0
-   }
+  "extends": [
+    "eslint:recommended",
+    "plugin:react/recommended",
+    "plugin:react-hooks/recommended",
+    "plugin:tailwindcss/recommended",
+    "plugin:@typescript-eslint/recommended"
+  ],
+  "parser": "@typescript-eslint/parser",
+  "root": true,
+  "plugins": ["react", "react-hooks", "tailwindcss", "@typescript-eslint"],
+  "settings": {
+    "react": {
+      "version": "detect"
+    }
+  },
+  "env": {
+    "browser": true,
+    "node": true,
+    "jasmine": true
+  },
+  "parserOptions": {
+    "sourceType": "module",
+    "tsconfigRootDir": "./",
+    "ecmaFeatures": {
+      "jsx": true
+    }
+  },
+  "rules": {
+    "max-len": [2, 250],
+    "object-curly-newline": 0,
+    "react/react-in-jsx-scope": "off",
+    "no-unused-vars": "off",
+    "@typescript-eslint/no-unused-vars": "warn",
+    "react/prop-types": 0,
+    "react-hooks/exhaustive-deps": "off"
+  }
 }
