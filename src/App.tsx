@@ -1,9 +1,10 @@
 import { useState } from "react";
 import Canvas from "./board/Square";
 import { ICanvasType } from "./types/types";
+import { useLocalStore } from "./store/useLocalStore";
 export default function App() {
   const [canv, setCanv] = useState<HTMLCanvasElement | null>(null);
-  const [canvasType, setCanvasType] = useState<ICanvasType>("move");
+  const { setCanvasType } = useLocalStore((state) => state);
   return (
     <div className="h-screen w-screen">
       <canvas
@@ -21,14 +22,7 @@ export default function App() {
           square
         </button>
       </div>
-      {canv && (
-        <Canvas
-          canv={canv}
-          setCanv={setCanv}
-          canvasType={canvasType}
-          setCanvasType={setCanvasType}
-        ></Canvas>
-      )}
+      {canv && <Canvas canv={canv} setCanv={setCanv}></Canvas>}
     </div>
   );
 }
