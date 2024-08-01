@@ -1,6 +1,5 @@
 import { useEffect, useRef } from "react";
 import { Hooks } from "../Hooks";
-import { ICanvasType } from "../types/types";
 import { useLocalStore } from "../store/useLocalStore";
 
 class Square {
@@ -11,17 +10,13 @@ class Square {
   width: number = 10;
   selectX: number = 0;
   selectY: number = 0;
-  private startX: number;
-  private startY: number;
   constructor(x: number, y: number) {
     this.x = x;
     this.y = y;
-    this.startX = x;
-    this.startY = y;
   }
   update(x: number, y: number) {
-    this.width = x - this.startX;
-    this.height = y - this.startY;
+    this.width = x - this.x;
+    this.height = y - this.y;
   }
   move(mouseMoveX: number, mouseMoveY: number) {
     this.x = mouseMoveX - this.selectX;
@@ -29,9 +24,24 @@ class Square {
     return this;
   }
   draw(ctx: CanvasRenderingContext2D | null | undefined, hue: number) {
-    ctx!.strokeStyle = `hsl(${hue},100%,50%)`;
     ctx?.beginPath();
+    ctx!.strokeStyle = `hsl(${hue},100%,50%)`;
+
+    ctx!.lineWidth = 1;
+    ctx?.setLineDash([]);
     ctx?.strokeRect(this.x, this.y, this.width, this.height);
+    ctx?.stroke();
+    return this;
+  }
+  select(
+    ctx: CanvasRenderingContext2D | null | undefined,
+    lineDashOffset: 2 | 6 | 0 = 0,
+  ) {
+    ctx?.beginPath();
+    ctx!.lineWidth = 0.7;
+    ctx?.setLineDash([10, 5]);
+    ctx!.strokeStyle = `hsl(195, 100%, 50%)`;
+    ctx?.strokeRect(this.x - 5, this.y - 5, this.width + 10, this.height + 10);
     ctx?.stroke();
     return this;
   }
@@ -42,10 +52,13 @@ export default function Canvas({
   canv: HTMLCanvasElement | null;
   setCanv?: React.Dispatch<React.SetStateAction<HTMLCanvasElement | null>>;
 }) {
+  canv!.width = window.innerWidth;
+  canv!.height = window.innerHeight;
+  const ctx = canv?.getContext("2d", { willReadFrequently: true });
+  ctx?.setLineDash([6]);
   const { getCanvasType, setCanvasType } = useLocalStore();
   const requestRef = useRef<number>(0);
   let isDrawing = false;
-  const ctx = canv?.getContext("2d", { willReadFrequently: true });
   const mouse = {
     startX: 0,
     startY: 0,
@@ -54,9 +67,8 @@ export default function Canvas({
     radius: 1000,
   };
   const squares: Square[] = [];
-  let selectSquare: Square | null;
-  canv!.width = window.innerWidth;
-  canv!.height = window.innerHeight;
+  let select: Square[] = [];
+  let move: boolean = false;
   Hooks.Resize(canv);
   Hooks.useAddEventListener("mousemove", (event: MouseEvent) => {
     mouse.x = event.x;
@@ -64,41 +76,67 @@ export default function Canvas({
     if (getCanvasType() == "square" && squares && isDrawing) {
       squares[squares.length - 1].update(mouse.x, mouse.y);
     }
-    if (selectSquare) {
-      selectSquare.move(event.x, event.y);
-    }
-  });
-  Hooks.useAddEventListener("mousedown", (event: MouseEvent) => {
-    isDrawing = true;
-    if (getCanvasType() === "square")
-      squares.push(new Square(event.x, event.y));
-    if (getCanvasType() === "move") {
-      squares.map((square) => {
-        if (
-          square.x < event.x &&
-          square.x + square.width > event.x &&
-          square.y < event.y &&
-          square.y + square.height > event.y
-        ) {
-          square.selectX = event.x - square.x;
-          square.selectY = event.y - square.y;
-          selectSquare = square;
-        }
+    if (getCanvasType() == "move" && select.length !== 0 && move) {
+      select.map((el) => {
+        el.move(event.x, event.y);
       });
     }
   });
-  Hooks.useAddEventListener("mouseup", (_event: MouseEvent) => {
+  Hooks.useAddEventListener("mousedown", (event: MouseEvent) => {
+    if (getCanvasType() === "square") {
+      isDrawing = true;
+      squares.push(new Square(event.x, event.y));
+    }
+    if (getCanvasType() === "move") {
+      for (let i = 0; i < squares.length; i++) {
+        const square = squares[squares.length - i - 1];
+        if (
+          square.x - 5 < event.x &&
+          square.x + square.width + 5 > event.x &&
+          square.y - 5 < event.y &&
+          square.y + square.height + 5 > event.y
+        ) {
+          if (
+            !(
+              select.length === 0 &&
+              square.x + 5 < event.x &&
+              square.x + square.width - 5 > event.x &&
+              square.y + 5 < event.y &&
+              square.y + square.height - 5 > event.y
+            )
+          ) {
+            square.selectX = event.x - square.x;
+            square.selectY = event.y - square.y;
+            move = true;
+            select = [square];
+            break;
+          }
+        } else {
+          console.log("fuck");
+          select = [];
+          move = false;
+        }
+      }
+    }
+  });
+  Hooks.useAddEventListener("mouseup", () => {
     isDrawing = false;
     if (getCanvasType() !== "move") {
       setCanvasType("move");
     }
-    selectSquare = null;
+    move = false;
   });
   const Animation = () => {
+    ctx?.beginPath();
     ctx?.clearRect(0, 0, canv!.width, canv!.height);
     if (squares) {
       squares.map((square) => {
         square.draw(ctx, 0);
+      });
+    }
+    if (squares) {
+      select.map((square) => {
+        square.select(ctx, 6);
       });
     }
     requestRef.current = requestAnimationFrame(() => Animation());
