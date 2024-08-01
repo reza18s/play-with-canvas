@@ -1,8 +1,9 @@
 import { useEffect, useRef } from "react";
 import { Hooks } from "../Hooks";
 import { useLocalStore } from "../store/useLocalStore";
-
+import { v4 } from "uuid";
 class Square {
+  readonly id = v4();
   type = "square";
   x: number = 0;
   y: number = 0;
@@ -81,12 +82,7 @@ export default function Canvas({
         el.move(event.x, event.y);
       });
     }
-  });
-  Hooks.useAddEventListener("mousedown", (event: MouseEvent) => {
-    if (getCanvasType() === "square") {
-      isDrawing = true;
-      squares.push(new Square(event.x, event.y));
-    }
+
     if (getCanvasType() === "move") {
       for (let i = 0; i < squares.length; i++) {
         const square = squares[squares.length - i - 1];
@@ -96,25 +92,89 @@ export default function Canvas({
           square.y - 5 < event.y &&
           square.y + square.height + 5 > event.y
         ) {
-          if (
+          if (select.length !== 0 && select.find((el) => el.id === square.id)) {
+            document.body.style.cursor = "move";
+            break;
+          } else if (
             !(
-              select.length === 0 &&
               square.x + 5 < event.x &&
               square.x + square.width - 5 > event.x &&
               square.y + 5 < event.y &&
               square.y + square.height - 5 > event.y
             )
           ) {
-            square.selectX = event.x - square.x;
-            square.selectY = event.y - square.y;
-            move = true;
-            select = [square];
+            document.body.style.cursor = "move";
+            break;
+          } else {
+            document.body.style.cursor = "auto";
+          }
+        } else {
+          document.body.style.cursor = "auto";
+        }
+      }
+    }
+  });
+  Hooks.useAddEventListener("mousedown", (event: MouseEvent) => {
+    if (getCanvasType() === "square") {
+      isDrawing = true;
+      squares.push(new Square(event.x, event.y));
+    }
+    if (getCanvasType() === "move") {
+      let selectSquare: Square | null;
+      let selectStates: "move" | "select" | "notFound";
+      for (let i = 0; i < squares.length; i++) {
+        const square = squares[squares.length - i - 1];
+        if (
+          square.x - 5 < event.x &&
+          square.x + square.width + 5 > event.x &&
+          square.y - 5 < event.y &&
+          square.y + square.height + 5 > event.y
+        ) {
+          if (select.length !== 0 && select.find((el) => el.id === square.id)) {
+            select.find((el) => {
+              el.id === square.id;
+            });
+            selectStates = "select";
+            selectSquare = square;
+            break;
+          } else if (
+            !(
+              square.x + 5 < event.x &&
+              square.x + square.width - 5 > event.x &&
+              square.y + 5 < event.y &&
+              square.y + square.height - 5 > event.y
+            )
+          ) {
+            selectStates = "move";
+            selectSquare = square;
             break;
           }
         } else {
-          console.log("fuck");
-          select = [];
-          move = false;
+          selectSquare = null;
+          selectStates = "notFound";
+        }
+      }
+      if (selectStates!) {
+        switch (selectStates) {
+          case "notFound":
+            console.log("fuck");
+            select = [];
+            move = false;
+            break;
+          case "move":
+            console.log(selectStates);
+            selectSquare!.selectX = event.x - selectSquare!.x;
+            selectSquare!.selectY = event.y - selectSquare!.y;
+            move = true;
+            select = [selectSquare!];
+            break;
+          case "select":
+            console.log(selectStates);
+            selectSquare!.selectX = event.x - selectSquare!.x;
+            selectSquare!.selectY = event.y - selectSquare!.y;
+            move = true;
+            select = [selectSquare!];
+            break;
         }
       }
     }
