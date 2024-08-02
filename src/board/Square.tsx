@@ -72,25 +72,24 @@ export default function Canvas({
         document.body.style.cursor = cursorType;
       }
     }
-    // if (getCanvasType() === "move" && resize) {
-    //   switch (resize) {
-    //     case "resize-top":
-    //       selectedItem.map((item) => {
-    //         item.resize({
-    //           y: event.y,
-    //           x2: item.resize_height - (event.y - item.selectY),
-    //         });
-    //       });
-    //       break;
-    //     case "resize-bottom":
-    //     case "resize-left":
-    //     case "resize-right":
-    //     case "resize-top-left":
-    //     case "resize-top-right":
-    //     case "resize-bottom-left":
-    //     case "resize-bottom-right":
-    //   }
-    // }
+    if (getCanvasType() === "move" && resize) {
+      switch (resize) {
+        case "resize-top":
+          selectedItem.map((item) => {
+            item.resize({
+              y: event.y,
+            });
+          });
+          break;
+        case "resize-bottom":
+        case "resize-left":
+        case "resize-right":
+        case "resize-top-left":
+        case "resize-top-right":
+        case "resize-bottom-left":
+        case "resize-bottom-right":
+      }
+    }
     // to update the size off select square
     if (select) select.update(event.x, event.y).draw(ctx, 190);
   });

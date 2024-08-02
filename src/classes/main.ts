@@ -1,4 +1,6 @@
 export class Main {
+  baseX: number = 0;
+  baseY: number = 0;
   x: number = 0;
   y: number = 0;
   x2: number = 0;
@@ -16,8 +18,16 @@ export class Main {
     this.y2 = y;
   }
   update(x: number, y: number) {
-    this.x2 = x;
-    this.y2 = y;
+    if (x > this.baseX) {
+      this.x2 = x;
+    } else {
+      this.x = x;
+    }
+    if (y > this.baseY) {
+      this.y2 = y;
+    } else {
+      this.y = y;
+    }
     this.calcTBLR();
     return this;
   }

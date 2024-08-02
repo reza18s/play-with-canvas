@@ -4,18 +4,8 @@ import { Main } from "./main";
 export class Selector extends Main {
   readonly id = v4();
   readonly type = "select";
-  x: number = 0;
-  y: number = 0;
-  x2: number = 0;
-  y2: number = 0;
   selectX: number = 0;
   selectY: number = 0;
-  corners: { top: number; bottom: number; left: number; right: number } = {
-    top: 0,
-    bottom: 0,
-    left: 0,
-    right: 0,
-  };
   resize_height: number = 0;
   resize_width: number = 0;
   constructor(x: number, y: number) {
