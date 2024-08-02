@@ -12,6 +12,8 @@ export class Main {
     right: 0,
   };
   constructor(x: number, y: number) {
+    this.baseX = x;
+    this.baseY = y;
     this.x = x;
     this.y = y;
     this.x2 = x;
@@ -28,6 +30,7 @@ export class Main {
     } else {
       this.y = y;
     }
+
     this.calcTBLR();
     return this;
   }

@@ -52,6 +52,7 @@ export default function Canvas({
     // to update the size off square when the client draws
     if (getCanvasType() == "square" && Items && isDrawing) {
       Items[Items.length - 1].update(mouse.x, mouse.y);
+      console.log(Items[Items.length - 1]);
     }
     // to move the selected item
     if (getCanvasType() == "move" && selectedItem.length !== 0 && move) {
