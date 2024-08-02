@@ -1,12 +1,13 @@
 import { v4 } from "uuid";
+import { Main } from "./main";
 
-export class Selector {
+export class Selector extends Main {
   readonly id = v4();
   readonly type = "select";
   x: number = 0;
   y: number = 0;
-  height: number = 10;
-  width: number = 10;
+  x2: number = 0;
+  y2: number = 0;
   selectX: number = 0;
   selectY: number = 0;
   corners: { top: number; bottom: number; left: number; right: number } = {
@@ -15,44 +16,52 @@ export class Selector {
     left: 0,
     right: 0,
   };
+  resize_height: number = 0;
+  resize_width: number = 0;
   constructor(x: number, y: number) {
-    this.x = x;
-    this.y = y;
+    super(x, y);
   }
-  update(x: number, y: number) {
-    this.width = x - this.x;
-    this.height = y - this.y;
-    this.calcTBLR();
-    return this;
-  }
+
   move(mouseMoveX: number, mouseMoveY: number) {
+    const width = this.x2 - this.x;
+    const height = this.y2 - this.y;
     this.x = mouseMoveX - this.selectX;
     this.y = mouseMoveY - this.selectY;
+    this.x2 = this.x + width;
+    this.y2 = this.y + height;
+
     this.calcTBLR();
     return this;
   }
-  private calcTBLR() {
-    if (this.x < this.x + this.width) {
-      this.corners.left = this.x;
-      this.corners.right = this.x + this.width;
-    } else {
-      this.corners.left = this.x + this.width;
-      this.corners.right = this.x;
-    }
-    if (this.y < this.y + this.height) {
-      this.corners.top = this.y;
-      this.corners.bottom = this.y + this.height;
-    } else {
-      this.corners.top = this.y + this.height;
-      this.corners.bottom = this.y;
-    }
+
+  resize({
+    x,
+    y,
+    x2,
+    y2,
+  }: {
+    x?: number;
+    y?: number;
+    x2?: number;
+    y2?: number;
+  }) {
+    if (x) this.x = x - this.selectX;
+    if (y) this.y = y - this.selectY;
+    if (x2) this.x2 = x2;
+    if (y2) this.y2 = y2;
+    this.calcTBLR();
   }
   draw(ctx: CanvasRenderingContext2D | null | undefined, hue: number) {
     ctx?.beginPath();
     ctx!.strokeStyle = `hsl(${hue},100%,50%)`;
     ctx!.lineWidth = 1;
     ctx?.setLineDash([2]);
-    ctx?.strokeRect(this.x, this.y, this.width, this.height);
+    ctx?.strokeRect(
+      this.corners.left,
+      this.corners.top,
+      this.corners.right - this.corners.left,
+      this.corners.bottom - this.corners.top,
+    );
     ctx?.stroke();
     return this;
   }
@@ -61,7 +70,12 @@ export class Selector {
     ctx!.strokeStyle = `hsl(${hue},100%,50%)`;
     ctx!.lineWidth = 1;
     ctx?.setLineDash([2]);
-    ctx?.strokeRect(this.x, this.y, this.width, this.height);
+    ctx?.strokeRect(
+      this.corners.left,
+      this.corners.top,
+      this.corners.right - this.corners.left,
+      this.corners.bottom - this.corners.top,
+    );
     ctx?.stroke();
     return this;
   }

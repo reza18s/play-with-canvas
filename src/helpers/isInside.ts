@@ -3,17 +3,17 @@ import { ISelectItem } from "../types/types";
 export const Inside = ({
   Item,
   event,
-  offset = 5,
+  offset = 10,
 }: {
   Item: ISelectItem;
   event: MouseEvent;
   offset?: number;
 }) => {
   if (
-    Item.x - offset < event.x &&
-    Item.x + Item.width + offset > event.x &&
-    Item.y - offset < event.y &&
-    Item.y + Item.height + offset > event.y
+    Item.corners.left - offset < event.x &&
+    Item.corners.right + offset > event.x &&
+    Item.corners.top - offset < event.y &&
+    Item.corners.bottom + offset > event.y
   ) {
     return true;
   } else return false;

@@ -20,6 +20,7 @@ export default function Canvas({
   const { getCanvasType, setCanvasType } = useLocalStore();
   const requestRef = useRef<number>(0);
   let isDrawing = false;
+
   const mouse = {
     startX: 0,
     startY: 0,
@@ -33,6 +34,16 @@ export default function Canvas({
   let selector: Selector | null;
 
   let move: boolean = false;
+  let resize:
+    | "resize-top"
+    | "resize-bottom"
+    | "resize-left"
+    | "resize-right"
+    | "resize-top-left"
+    | "resize-top-right"
+    | "resize-bottom-left"
+    | "resize-bottom-right"
+    | null;
   Hooks.Resize(canv);
   Hooks.useAddEventListener("mousemove", (event: MouseEvent) => {
     // to save the mouse position on client
@@ -51,32 +62,35 @@ export default function Canvas({
     }
     // to change the icon off the cursor (it can use to check there is item or not )
     if (getCanvasType() === "move") {
-      const { selectStates } = SelectChecker({
+      const { cursorType } = SelectChecker({
         Items,
         event,
         selectedItem,
         selector,
       });
-      if (selectStates!) {
-        switch (selectStates) {
-          case "notFound":
-            document.body.style.cursor = "auto";
-            break;
-          case "move":
-            document.body.style.cursor = "move";
-            break;
-          case "moveMany":
-            document.body.style.cursor = "move";
-            break;
-          case "select":
-            document.body.style.cursor = "move";
-            break;
-          case "resize":
-            document.body.style.cursor = "col-resize";
-            break;
-        }
+      if (cursorType!) {
+        document.body.style.cursor = cursorType;
       }
     }
+    // if (getCanvasType() === "move" && resize) {
+    //   switch (resize) {
+    //     case "resize-top":
+    //       selectedItem.map((item) => {
+    //         item.resize({
+    //           y: event.y,
+    //           x2: item.resize_height - (event.y - item.selectY),
+    //         });
+    //       });
+    //       break;
+    //     case "resize-bottom":
+    //     case "resize-left":
+    //     case "resize-right":
+    //     case "resize-top-left":
+    //     case "resize-top-right":
+    //     case "resize-bottom-left":
+    //     case "resize-bottom-right":
+    //   }
+    // }
     // to update the size off select square
     if (select) select.update(event.x, event.y).draw(ctx, 190);
   });
@@ -88,7 +102,7 @@ export default function Canvas({
     }
     // to move the item
     if (getCanvasType() === "move") {
-      const { selectSquare, selectStates } = SelectChecker({
+      const { selectItem, selectStates } = SelectChecker({
         Items,
         event,
         selectedItem,
@@ -117,10 +131,24 @@ export default function Canvas({
             move = true;
             break;
           case "select":
-            selectSquare!.selectX = event.x - selectSquare!.x;
-            selectSquare!.selectY = event.y - selectSquare!.y;
+            selectItem!.selectX = event.x - selectItem!.x;
+            selectItem!.selectY = event.y - selectItem!.y;
             move = true;
-            selectedItem = [selectSquare!];
+            selectedItem = [selectItem!];
+            break;
+          case "resize-top":
+          case "resize-left":
+          case "resize-top-left":
+          case "resize-top-right":
+          case "resize-bottom-left":
+          case "resize-bottom-right":
+          case "resize-bottom":
+          case "resize-right":
+            selectedItem?.map((item) => {
+              item.selectX = event.x;
+              item.selectY = event.y;
+            });
+            resize = selectStates;
             break;
         }
       }
@@ -129,6 +157,7 @@ export default function Canvas({
 
   Hooks.useAddEventListener("mouseup", () => {
     isDrawing = false;
+    resize = null;
     if (getCanvasType() !== "move") {
       setCanvasType("move");
     }
