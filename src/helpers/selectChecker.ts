@@ -38,6 +38,7 @@ export const SelectChecker = ({
     | "nwse-resize" = "auto";
   for (let i = 0; i < Items.length; i++) {
     const Item = Items[Items.length - i - 1];
+
     if (Inside({ Item, event })) {
       if (
         selectedItem.length !== 0 &&

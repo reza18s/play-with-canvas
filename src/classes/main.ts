@@ -22,13 +22,17 @@ export class Main {
   update(x: number, y: number) {
     if (x > this.baseX) {
       this.x2 = x;
+      this.x = this.baseX;
     } else {
       this.x = x;
+      this.x2 = this.baseX;
     }
     if (y > this.baseY) {
       this.y2 = y;
+      this.y = this.baseY;
     } else {
       this.y = y;
+      this.y2 = this.baseY;
     }
 
     this.calcTBLR();

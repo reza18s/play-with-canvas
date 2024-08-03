@@ -23,12 +23,8 @@ export class Square extends Main {
     x2?: number;
     y2?: number;
   }) {
-    if (x) {
-      this.x = x;
-    }
-    if (y) {
-      this.y = y;
-    }
+    if (x) this.x = x;
+    if (y) this.y = y;
     if (x2) this.x2 = x2;
     if (y2) this.y2 = y2;
     this.calcTBLR();

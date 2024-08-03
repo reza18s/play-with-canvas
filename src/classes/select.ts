@@ -13,21 +13,11 @@ export class Select extends Main {
     ctx!.strokeStyle = `hsl(${hue},100%,50%)`;
     ctx!.lineWidth = 1;
     ctx?.setLineDash([]);
-    ctx?.strokeRect(
-      this.corners.left,
-      this.corners.top,
-      this.corners.right - this.corners.left,
-      this.corners.bottom - this.corners.top,
-    );
+    ctx?.strokeRect(this.x, this.y, this.x2 - this.x, this.y2 - this.y);
     ctx?.stroke();
     ctx?.beginPath();
     ctx!.fillStyle = `hsla(${hue},100%,50%,0.1)`;
-    ctx?.fillRect(
-      this.corners.left,
-      this.corners.top,
-      this.corners.right - this.corners.left,
-      this.corners.bottom - this.corners.top,
-    );
+    ctx?.fillRect(this.x, this.y, this.x2 - this.x, this.y2 - this.y);
     ctx?.fill();
 
     return this;

@@ -10,10 +10,10 @@ export const Inside = ({
   offset?: number;
 }) => {
   if (
-    Item.corners.left - offset < event.x &&
-    Item.corners.right + offset > event.x &&
-    Item.corners.top - offset < event.y &&
-    Item.corners.bottom + offset > event.y
+    Item.x - offset < event.x &&
+    Item.x2 + offset > event.x &&
+    Item.y - offset < event.y &&
+    Item.y2 + offset > event.y
   ) {
     return true;
   } else return false;

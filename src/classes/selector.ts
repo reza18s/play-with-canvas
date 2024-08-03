@@ -46,12 +46,7 @@ export class Selector extends Main {
     ctx!.strokeStyle = `hsl(${hue},100%,50%)`;
     ctx!.lineWidth = 1;
     ctx?.setLineDash([2]);
-    ctx?.strokeRect(
-      this.corners.left,
-      this.corners.top,
-      this.corners.right - this.corners.left,
-      this.corners.bottom - this.corners.top,
-    );
+    ctx?.strokeRect(this.x, this.y, this.x2 - this.x, this.y2 - this.y);
     ctx?.stroke();
     return this;
   }
@@ -60,12 +55,7 @@ export class Selector extends Main {
     ctx!.strokeStyle = `hsl(${hue},100%,50%)`;
     ctx!.lineWidth = 1;
     ctx?.setLineDash([2]);
-    ctx?.strokeRect(
-      this.corners.left,
-      this.corners.top,
-      this.corners.right - this.corners.left,
-      this.corners.bottom - this.corners.top,
-    );
+    ctx?.strokeRect(this.x, this.y, this.x2 - this.x, this.y2 - this.y);
     ctx?.stroke();
     return this;
   }

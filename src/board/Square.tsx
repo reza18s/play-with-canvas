@@ -26,7 +26,7 @@ export default function Canvas({
     startY: 0,
     x: 0,
     y: 0,
-    radius: 1000,
+    radius: 100,
   };
   const Items: ISelectItems = [];
   let selectedItem: ISelectItems = [];
@@ -34,6 +34,8 @@ export default function Canvas({
   let selector: Selector | null;
 
   let move: boolean = false;
+  let switchResizeX = false;
+  let switchResizeY = false;
   let resize:
     | "resize-top"
     | "resize-bottom"
@@ -52,7 +54,6 @@ export default function Canvas({
     // to update the size off square when the client draws
     if (getCanvasType() == "square" && Items && isDrawing) {
       Items[Items.length - 1].update(mouse.x, mouse.y);
-      console.log(Items[Items.length - 1]);
     }
     // to move the selected item
     if (getCanvasType() == "move" && selectedItem.length !== 0 && move) {
@@ -77,18 +78,189 @@ export default function Canvas({
       switch (resize) {
         case "resize-top":
           selectedItem.map((item) => {
+            if (item.y2 - item.y > 1) {
+              switchResizeY = true;
+            }
+            if (item.y > item.y2 && switchResizeY) {
+              resize = "resize-bottom";
+              switchResizeY = false;
+            }
             item.resize({
               y: event.y,
             });
           });
           break;
         case "resize-bottom":
+          selectedItem.map((item) => {
+            if (item.y2 - item.y > 1) {
+              switchResizeY = true;
+            }
+            if (item.y > item.y2 && switchResizeY) {
+              resize = "resize-top";
+              switchResizeY = false;
+            }
+            item.resize({
+              y2: event.y,
+            });
+          });
+          break;
         case "resize-left":
+          selectedItem.map((item) => {
+            if (item.x2 - item.x > 1) {
+              switchResizeX = true;
+            }
+            if (item.x > item.x2 && switchResizeX) {
+              resize = "resize-right";
+              switchResizeX = false;
+            }
+            item.resize({
+              x: event.x,
+            });
+          });
+          break;
         case "resize-right":
+          selectedItem.map((item) => {
+            if (item.x2 - item.x > 1) {
+              switchResizeX = true;
+              if (item.x2 < item.x) {
+                console.log("f");
+              }
+            }
+            if (item.x > item.x2 && switchResizeX) {
+              resize = "resize-left";
+              switchResizeX = false;
+            }
+            item.resize({
+              x2: event.x,
+            });
+          });
+          break;
         case "resize-top-left":
+          console.log("fuck");
+          selectedItem.map((item) => {
+            if (item.y2 - item.y > 1) {
+              switchResizeY = true;
+            }
+            if (item.x2 - item.x > 1) {
+              switchResizeX = true;
+            }
+            if (
+              item.y > item.y2 &&
+              switchResizeY &&
+              item.x > item.x2 &&
+              switchResizeX
+            ) {
+              resize = "resize-bottom-right";
+              switchResizeY = false;
+              switchResizeX = false;
+            } else if (item.y > item.y2 && switchResizeY) {
+              resize = "resize-bottom-left";
+              switchResizeY = false;
+            } else if (item.x > item.x2 && switchResizeX) {
+              resize = "resize-top-right";
+              switchResizeX = false;
+            } else {
+              item.resize({
+                y: event.y,
+                x: event.x,
+              });
+            }
+          });
+          break;
         case "resize-top-right":
+          console.log("fuck");
+          selectedItem.map((item) => {
+            if (item.y2 - item.y > 1) {
+              switchResizeY = true;
+            }
+            if (item.x2 - item.x > 1) {
+              switchResizeX = true;
+            }
+            if (
+              item.y > item.y2 &&
+              switchResizeY &&
+              item.x > item.x2 &&
+              switchResizeX
+            ) {
+              resize = "resize-bottom-left";
+              switchResizeY = false;
+              switchResizeX = false;
+            } else if (item.y > item.y2 && switchResizeY) {
+              resize = "resize-bottom-right";
+              switchResizeY = false;
+            } else if (item.x > item.x2 && switchResizeX) {
+              resize = "resize-top-left";
+              switchResizeX = false;
+            } else {
+              item.resize({
+                y: event.y,
+                x2: event.x,
+              });
+            }
+          });
+          break;
         case "resize-bottom-left":
+          selectedItem.map((item) => {
+            if (item.y2 - item.y > 1) {
+              switchResizeY = true;
+            }
+            if (item.x2 - item.x > 1) {
+              switchResizeX = true;
+            }
+            if (
+              item.y > item.y2 &&
+              switchResizeY &&
+              item.x > item.x2 &&
+              switchResizeX
+            ) {
+              resize = "resize-top-right";
+              switchResizeY = false;
+              switchResizeX = false;
+            } else if (item.y > item.y2 && switchResizeY) {
+              resize = "resize-top-left";
+              switchResizeY = false;
+            } else if (item.x > item.x2 && switchResizeX) {
+              resize = "resize-bottom-right";
+              switchResizeX = false;
+            } else {
+              item.resize({
+                y2: event.y,
+                x: event.x,
+              });
+            }
+          });
+          break;
         case "resize-bottom-right":
+          selectedItem.map((item) => {
+            if (item.y2 - item.y > 1) {
+              switchResizeY = true;
+            }
+            if (item.x2 - item.x > 1) {
+              switchResizeX = true;
+            }
+            if (
+              item.y > item.y2 &&
+              switchResizeY &&
+              item.x > item.x2 &&
+              switchResizeX
+            ) {
+              resize = "resize-top-left";
+              switchResizeY = false;
+              switchResizeX = false;
+            } else if (item.y > item.y2 && switchResizeY) {
+              resize = "resize-top-right";
+              switchResizeY = false;
+            } else if (item.x > item.x2 && switchResizeX) {
+              resize = "resize-bottom-left";
+              switchResizeX = false;
+            } else {
+              item.resize({
+                y2: event.y,
+                x2: event.x,
+              });
+            }
+          });
+          break;
       }
     }
     // to update the size off select square
@@ -161,6 +333,18 @@ export default function Canvas({
     if (getCanvasType() !== "move") {
       setCanvasType("move");
     }
+    Items.map((Item) => {
+      if (Item.x > Item.x2) {
+        const x = Item.x;
+        Item.x = Item.x2;
+        Item.x2 = x;
+      }
+      if (Item.y > Item.y2) {
+        const y = Item.y;
+        Item.y = Item.y2;
+        Item.y2 = y;
+      }
+    });
     if (select) {
       let top = 0,
         bottom = 0,
