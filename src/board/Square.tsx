@@ -4,8 +4,14 @@ import { useLocalStore } from "../store/useLocalStore";
 import { Square } from "../classes/square";
 import { SelectChecker } from "../helpers/selectChecker";
 import { Select } from "../classes/select";
-import { ISelectItems } from "../types/types";
+import {
+  ICursorIcon,
+  IResize,
+  ISelectItem,
+  ISelectItems,
+} from "../types/types";
 import { Selector } from "../classes/selector";
+import { resizeHelper } from "../helpers/resize";
 
 export default function Canvas({
   canv,
@@ -13,300 +19,216 @@ export default function Canvas({
   canv: HTMLCanvasElement | null;
   setCanv?: React.Dispatch<React.SetStateAction<HTMLCanvasElement | null>>;
 }) {
-  canv!.width = window.innerWidth;
-  canv!.height = window.innerHeight;
+  const hitCanv = document.createElement("canvas");
+  hitCanv.width = canv!.width;
+  hitCanv.height = canv!.height;
   const ctx = canv?.getContext("2d", { willReadFrequently: true });
-  ctx?.setLineDash([6]);
+  const hitctx = hitCanv.getContext("2d", { willReadFrequently: true });
   const { getCanvasType, setCanvasType } = useLocalStore();
   const requestRef = useRef<number>(0);
   let isDrawing = false;
-
-  const mouse = {
-    startX: 0,
-    startY: 0,
-    x: 0,
-    y: 0,
-    radius: 100,
-  };
   const Items: ISelectItems = [];
-  let selectedItem: ISelectItems = [];
+  let newItem: ISelectItem | null;
+  let selectedItems: ISelectItems = [];
   let select: Select | null;
   let selector: Selector | null;
-
   let move: boolean = false;
-  let switchResizeX = false;
-  let switchResizeY = false;
-  let resize:
-    | "resize-top"
-    | "resize-bottom"
-    | "resize-left"
-    | "resize-right"
-    | "resize-top-left"
-    | "resize-top-right"
-    | "resize-bottom-left"
-    | "resize-bottom-right"
-    | null;
+  let resize: IResize | null = null;
+  let cursorIcon: ICursorIcon;
   Hooks.Resize(canv);
   Hooks.useAddEventListener("mousemove", (event: MouseEvent) => {
-    // to save the mouse position on client
-    mouse.x = event.x;
-    mouse.y = event.y;
     // to update the size off square when the client draws
     if (getCanvasType() == "square" && Items && isDrawing) {
-      Items[Items.length - 1].update(mouse.x, mouse.y);
+      newItem?.update(event.x, event.y);
     }
     // to move the selected item
-    if (getCanvasType() == "move" && selectedItem.length !== 0 && move) {
-      selectedItem.map((el) => {
+    if (getCanvasType() == "move" && selectedItems.length !== 0 && move) {
+      selectedItems.map((el) => {
         el.move(event.x, event.y);
       });
       selector?.move(event.x, event.y);
     }
     // to change the icon off the cursor (it can use to check there is item or not )
     if (getCanvasType() === "move") {
-      const { cursorType } = SelectChecker({
-        Items,
-        event,
-        selectedItem,
-        selector,
-      });
-      if (cursorType!) {
-        document.body.style.cursor = cursorType;
+      if (move) {
+        document.body.style.cursor = "move";
+      } else if (resize) {
+        document.body.style.cursor = cursorIcon;
+      } else {
+        const { cursorType } = SelectChecker({
+          Items,
+          event,
+          selectedItem: selectedItems,
+          selector,
+        });
+        if (cursorType!) {
+          document.body.style.cursor = cursorType;
+        }
       }
     }
+    // to handel resize event
     if (getCanvasType() === "move" && resize) {
       switch (resize) {
         case "resize-top":
-          selectedItem.map((item) => {
-            if (item.y2 - item.y > 1) {
-              switchResizeY = true;
-            }
-            if (item.y > item.y2 && switchResizeY) {
-              resize = "resize-bottom";
-              switchResizeY = false;
-            }
-            item.resize({
-              y: event.y,
+          if (selector) {
+            selector?.resize({ y: event.y - selector.selectY });
+            resizeHelper.ResizeGroup({ selectedItems, selector, type: "y" });
+          } else {
+            selectedItems.map((item) => {
+              item.resize({
+                y: event.y,
+              });
             });
-          });
+          }
           break;
         case "resize-bottom":
-          selectedItem.map((item) => {
-            if (item.y2 - item.y > 1) {
-              switchResizeY = true;
-            }
-            if (item.y > item.y2 && switchResizeY) {
-              resize = "resize-top";
-              switchResizeY = false;
-            }
-            item.resize({
-              y2: event.y,
+          if (selector) {
+            selector?.resize({ y2: event.y + selector.selectY2 });
+            resizeHelper.ResizeGroup({ selectedItems, selector, type: "y" });
+          } else {
+            selectedItems.map((item) => {
+              item.resize({
+                y2: event.y,
+              });
             });
-          });
+          }
           break;
         case "resize-left":
-          selectedItem.map((item) => {
-            if (item.x2 - item.x > 1) {
-              switchResizeX = true;
-            }
-            if (item.x > item.x2 && switchResizeX) {
-              resize = "resize-right";
-              switchResizeX = false;
-            }
-            item.resize({
-              x: event.x,
+          if (selector) {
+            selector?.resize({ x: event.x + selector.selectX });
+            resizeHelper.ResizeGroup({ selectedItems, selector, type: "x" });
+          } else {
+            selectedItems.map((item) => {
+              item.resize({
+                x: event.x,
+              });
             });
-          });
+          }
           break;
         case "resize-right":
-          selectedItem.map((item) => {
-            if (item.x2 - item.x > 1) {
-              switchResizeX = true;
-              if (item.x2 < item.x) {
-                console.log("f");
-              }
-            }
-            if (item.x > item.x2 && switchResizeX) {
-              resize = "resize-left";
-              switchResizeX = false;
-            }
-            item.resize({
-              x2: event.x,
+          if (selector) {
+            selector?.resize({ x2: event.x + selector.selectX2 });
+            resizeHelper.ResizeGroup({ selectedItems, selector, type: "x" });
+          } else {
+            selectedItems.map((item) => {
+              item.resize({
+                x2: event.x,
+              });
             });
-          });
+          }
           break;
         case "resize-top-left":
-          console.log("fuck");
-          selectedItem.map((item) => {
-            if (item.y2 - item.y > 1) {
-              switchResizeY = true;
-            }
-            if (item.x2 - item.x > 1) {
-              switchResizeX = true;
-            }
-            if (
-              item.y > item.y2 &&
-              switchResizeY &&
-              item.x > item.x2 &&
-              switchResizeX
-            ) {
-              resize = "resize-bottom-right";
-              switchResizeY = false;
-              switchResizeX = false;
-            } else if (item.y > item.y2 && switchResizeY) {
-              resize = "resize-bottom-left";
-              switchResizeY = false;
-            } else if (item.x > item.x2 && switchResizeX) {
-              resize = "resize-top-right";
-              switchResizeX = false;
-            } else {
+          if (selector) {
+            selector?.resize({
+              x: event.x + selector.selectX,
+              y: event.y - selector.selectY,
+            });
+            resizeHelper.ResizeGroup({ selectedItems, selector, type: "xy" });
+          } else {
+            selectedItems.map((item) => {
               item.resize({
                 y: event.y,
                 x: event.x,
               });
-            }
-          });
+            });
+          }
           break;
         case "resize-top-right":
-          console.log("fuck");
-          selectedItem.map((item) => {
-            if (item.y2 - item.y > 1) {
-              switchResizeY = true;
-            }
-            if (item.x2 - item.x > 1) {
-              switchResizeX = true;
-            }
-            if (
-              item.y > item.y2 &&
-              switchResizeY &&
-              item.x > item.x2 &&
-              switchResizeX
-            ) {
-              resize = "resize-bottom-left";
-              switchResizeY = false;
-              switchResizeX = false;
-            } else if (item.y > item.y2 && switchResizeY) {
-              resize = "resize-bottom-right";
-              switchResizeY = false;
-            } else if (item.x > item.x2 && switchResizeX) {
-              resize = "resize-top-left";
-              switchResizeX = false;
-            } else {
+          if (selector) {
+            selector?.resize({
+              x2: event.x + selector.selectX2,
+              y: event.y - selector.selectY,
+            });
+            resizeHelper.ResizeGroup({ selectedItems, selector, type: "xy" });
+          } else {
+            selectedItems.map((item) => {
               item.resize({
                 y: event.y,
                 x2: event.x,
               });
-            }
-          });
+            });
+          }
           break;
         case "resize-bottom-left":
-          selectedItem.map((item) => {
-            if (item.y2 - item.y > 1) {
-              switchResizeY = true;
-            }
-            if (item.x2 - item.x > 1) {
-              switchResizeX = true;
-            }
-            if (
-              item.y > item.y2 &&
-              switchResizeY &&
-              item.x > item.x2 &&
-              switchResizeX
-            ) {
-              resize = "resize-top-right";
-              switchResizeY = false;
-              switchResizeX = false;
-            } else if (item.y > item.y2 && switchResizeY) {
-              resize = "resize-top-left";
-              switchResizeY = false;
-            } else if (item.x > item.x2 && switchResizeX) {
-              resize = "resize-bottom-right";
-              switchResizeX = false;
-            } else {
+          if (selector) {
+            selector?.resize({
+              x: event.x + selector.selectX,
+              y2: event.y - selector.selectY2,
+            });
+            resizeHelper.ResizeGroup({ selectedItems, selector, type: "xy" });
+          } else {
+            selectedItems.map((item) => {
               item.resize({
                 y2: event.y,
                 x: event.x,
               });
-            }
-          });
+            });
+          }
           break;
         case "resize-bottom-right":
-          selectedItem.map((item) => {
-            if (item.y2 - item.y > 1) {
-              switchResizeY = true;
-            }
-            if (item.x2 - item.x > 1) {
-              switchResizeX = true;
-            }
-            if (
-              item.y > item.y2 &&
-              switchResizeY &&
-              item.x > item.x2 &&
-              switchResizeX
-            ) {
-              resize = "resize-top-left";
-              switchResizeY = false;
-              switchResizeX = false;
-            } else if (item.y > item.y2 && switchResizeY) {
-              resize = "resize-top-right";
-              switchResizeY = false;
-            } else if (item.x > item.x2 && switchResizeX) {
-              resize = "resize-bottom-left";
-              switchResizeX = false;
-            } else {
+          if (selector) {
+            selector?.resize({
+              x2: event.x + selector.selectX2,
+              y2: event.y - selector.selectY2,
+            });
+            resizeHelper.ResizeGroup({ selectedItems, selector, type: "xy" });
+          } else {
+            selectedItems.map((item) => {
               item.resize({
                 y2: event.y,
                 x2: event.x,
               });
-            }
-          });
+            });
+          }
           break;
       }
     }
     // to update the size off select square
-    if (select) select.update(event.x, event.y).draw(ctx, 190);
+    if (select) select.update(event.x, event.y);
   });
   Hooks.useAddEventListener("mousedown", (event: MouseEvent) => {
     // to save the position and draw the square
     if (getCanvasType() === "square") {
       isDrawing = true;
-      Items.push(new Square(event.x, event.y));
+      newItem = new Square(event.x, event.y);
     }
     // to move the item
     if (getCanvasType() === "move") {
-      const { selectItem, selectStates } = SelectChecker({
+      const { selectItem, selectStates, cursorType } = SelectChecker({
         Items,
         event,
-        selectedItem,
+        selectedItem: selectedItems,
         selector,
       });
       if (selectStates!) {
         switch (selectStates) {
           case "notFound":
-            selectedItem = [];
+            selectedItems = [];
             move = false;
-            select = new Select(mouse.x, mouse.y);
+            select = new Select(event.x, event.y);
             selector = null;
             break;
           case "move":
-            selectedItem[0]!.selectX = event.x - selectedItem[0]!.x;
-            selectedItem[0]!.selectY = event.y - selectedItem[0]!.y;
+            selectedItems[0]!.selectX = event.x - selectedItems[0]!.x;
+            selectedItems[0]!.selectY = event.y - selectedItems[0]!.y;
             move = true;
             break;
           case "moveMany":
-            selectedItem.map((sqrs) => {
+            selectedItems.map((sqrs) => {
               sqrs!.selectX = event.x - sqrs!.x;
               sqrs!.selectY = event.y - sqrs!.y;
             });
-            selector!.selectX = event.x - selector!.x;
-            selector!.selectY = event.y - selector!.y;
+            if (selector) {
+              selector.selectX = event.x - selector.x;
+              selector.selectY = event.y - selector.y;
+            }
             move = true;
             break;
           case "select":
             selectItem!.selectX = event.x - selectItem!.x;
             selectItem!.selectY = event.y - selectItem!.y;
             move = true;
-            selectedItem = [selectItem!];
+            selectedItems = [selectItem!];
             break;
           case "resize-top":
           case "resize-left":
@@ -316,10 +238,21 @@ export default function Canvas({
           case "resize-bottom-right":
           case "resize-bottom":
           case "resize-right":
-            selectedItem?.map((item) => {
-              item.selectX = event.x;
-              item.selectY = event.y;
+            selectedItems?.map((item) => {
+              item.selectX = item.x - event.x;
+              item.selectY = item.y - event.y;
+              item.selectX2 = item.x2 - event.x;
+              item.selectY2 = item.y2 - event.y;
             });
+            if (selector) {
+              selector.selectX = selector.x - event.x;
+              selector.selectY = selector.y - event.y;
+              selector.selectX2 = selector.x2 - event.x;
+              selector.selectY2 = selector.y2 - event.y;
+              selector!.lastWidth = selector!.x2 - selector!.x;
+              selector!.lastHeight = selector!.y2 - selector!.y;
+            }
+            cursorIcon = cursorType;
             resize = selectStates;
             break;
         }
@@ -330,9 +263,17 @@ export default function Canvas({
   Hooks.useAddEventListener("mouseup", () => {
     isDrawing = false;
     resize = null;
+    // to add new item array and select it
+    if (newItem) {
+      Items.push(newItem);
+      selectedItems = [newItem];
+      newItem = null;
+    }
+    //to change back the type of the canvas to move after drawing
     if (getCanvasType() !== "move") {
       setCanvasType("move");
     }
+    // to map the item and check if the  item.x is more than item.x2 or item.y is more than item.y2 and if its true it will replace their values
     Items.map((Item) => {
       if (Item.x > Item.x2) {
         const x = Item.x;
@@ -345,40 +286,88 @@ export default function Canvas({
         Item.y2 = y;
       }
     });
+    if (selector) {
+      if (selector.x > selector.x2) {
+        const x = selector.x;
+        selector.x = selector.x2;
+        selector.x2 = x;
+      }
+      if (selector.y > selector.y2) {
+        const y = selector.y;
+        selector.y = selector.y2;
+        selector.y2 = y;
+      }
+    }
+    // to select the item
     if (select) {
-      let top = 0,
-        bottom = 0,
-        left = 0,
-        right = 0;
-      selectedItem = Items.filter((square, index) => {
+      // to save the maximum corners
+      let selector_top: number,
+        selector_bottom: number,
+        selector_left: number,
+        selector_right: number;
+      let showSelector = true;
+      selectedItems = Items.filter((square, index) => {
+        // it will check for item witch is inside the select and return it
         if (
           square.corners.top > select!.corners.top &&
           square.corners.left > select!.corners.left &&
           square.corners.bottom < select!.corners.bottom &&
           square.corners.right < select!.corners.right
         ) {
-          if (index === 0) {
-            top = square.corners.top;
-            bottom = square.corners.bottom;
-            left = square.corners.left;
-            right = square.corners.right;
+          if (
+            !(
+              selector_top &&
+              selector_left &&
+              selector_right &&
+              selector_bottom
+            )
+          ) {
+            selector_top = square.corners.top;
+            selector_bottom = square.corners.bottom;
+            selector_left = square.corners.left;
+            selector_right = square.corners.right;
+          } else {
+            selector_top =
+              selector_top > square.corners.top
+                ? square.corners.top
+                : selector_top;
+            selector_bottom =
+              selector_bottom < square.corners.bottom
+                ? square.corners.bottom
+                : selector_bottom;
+            selector_left =
+              selector_left > square.corners.left
+                ? square.corners.left
+                : selector_left;
+            selector_right =
+              selector_right < square.corners.right
+                ? square.corners.right
+                : selector_right;
           }
-          top = top > square.corners.top ? square.corners.top : top;
-          bottom =
-            bottom < square.corners.bottom ? square.corners.bottom : bottom;
-          left = left > square.corners.left ? square.corners.left : left;
-          right = right < square.corners.right ? square.corners.right : right;
-          return selectedItem.push(square);
+          return selectedItems.push(square);
         }
       });
-      if (selectedItem.length > 1) {
-        selector = new Selector(left - 5, top - 5).update(
-          right + 5,
-          bottom + 5,
+      selectedItems.map((square) => {
+        // it will check the maximum corners belong to one item and if that true it wont show the selector
+        if (
+          square.corners.top == selector_top &&
+          square.corners.bottom == selector_bottom &&
+          square.corners.left == selector_left &&
+          square.corners.right == selector_right
+        ) {
+          showSelector = false;
+        }
+      });
+      if (selectedItems.length > 1) {
+        selector = new Selector(selector_left!, selector_top!).update(
+          selector_right!,
+          selector_bottom!,
         );
+        selector.show = showSelector;
       }
       select = null;
     }
+    console.log(Items);
     move = false;
   });
   const Animation = () => {
@@ -386,17 +375,15 @@ export default function Canvas({
     ctx?.clearRect(0, 0, canv!.width, canv!.height);
     if (Items) {
       Items.map((square) => {
-        square.draw(ctx, 0);
+        square.draw(ctx, hitctx, 0);
       });
     }
-    if (Items) {
-      selectedItem.map((square) => {
-        square.select(ctx, 160);
-      });
-    }
-    select?.draw(ctx, 190);
-
-    selector?.draw(ctx, 190);
+    selectedItems.map((square) => {
+      square.select(ctx, hitctx, 160);
+    });
+    select?.draw(ctx, hitctx, 190);
+    selector?.draw(ctx, hitctx, 190);
+    newItem?.draw(ctx, hitctx, 0);
     requestRef.current = requestAnimationFrame(() => Animation());
   };
   useEffect(() => {

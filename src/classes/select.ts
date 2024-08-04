@@ -8,7 +8,11 @@ export class Select extends Main {
     super(x, y);
   }
 
-  draw(ctx: CanvasRenderingContext2D | null | undefined, hue: number) {
+  draw(
+    ctx: CanvasRenderingContext2D | null | undefined,
+    hitctx: CanvasRenderingContext2D | null | undefined,
+    hue: number,
+  ) {
     ctx?.beginPath();
     ctx!.strokeStyle = `hsl(${hue},100%,50%)`;
     ctx!.lineWidth = 1;

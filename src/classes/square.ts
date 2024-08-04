@@ -6,6 +6,8 @@ export class Square extends Main {
   readonly type = "square";
   selectX: number = 0;
   selectY: number = 0;
+  selectX2: number = 0;
+  selectY2: number = 0;
   resize_height: number = 0;
   resize_width: number = 0;
   constructor(x: number, y: number) {
@@ -22,6 +24,7 @@ export class Square extends Main {
     y?: number;
     x2?: number;
     y2?: number;
+    scale?: number;
   }) {
     if (x) this.x = x;
     if (y) this.y = y;
@@ -40,30 +43,38 @@ export class Square extends Main {
     this.calcTBLR();
     return this;
   }
-  draw(ctx: CanvasRenderingContext2D | null | undefined, hue: number = 2) {
+  draw(
+    ctx: CanvasRenderingContext2D | null | undefined,
+    hitctx: CanvasRenderingContext2D | null | undefined,
+    hue: number = 2,
+  ) {
     ctx?.beginPath();
     ctx!.strokeStyle = `hsl(${hue},100%,50%)`;
     ctx!.lineWidth = 1;
     ctx?.setLineDash([]);
     ctx?.strokeRect(
-      this.corners.left,
-      this.corners.top,
-      this.corners.right - this.corners.left,
-      this.corners.bottom - this.corners.top,
+      this.corners.left + 5,
+      this.corners.top + 5,
+      this.corners.right - this.corners.left - 10,
+      this.corners.bottom - this.corners.top - 10,
     );
     ctx?.stroke();
     return this;
   }
-  select(ctx: CanvasRenderingContext2D | null | undefined, hue: number = 0) {
+  select(
+    ctx: CanvasRenderingContext2D | null | undefined,
+    hitctx: CanvasRenderingContext2D | null | undefined,
+    hue: number = 0,
+  ) {
     ctx?.beginPath();
     ctx!.strokeStyle = `hsl(${hue},100%,50%)`;
     ctx!.lineWidth = 1;
     ctx?.setLineDash([5, 10]);
     ctx?.strokeRect(
-      this.corners.left - 5,
-      this.corners.top - 5,
-      this.corners.right - this.corners.left + 10,
-      this.corners.bottom - this.corners.top + 10,
+      this.corners.left,
+      this.corners.top,
+      this.corners.right - this.corners.left,
+      this.corners.bottom - this.corners.top,
     );
     ctx?.stroke();
     return this;

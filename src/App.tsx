@@ -1,6 +1,5 @@
 import { useState } from "react";
 import Canvas from "./board/Square";
-import { ICanvasType } from "./types/types";
 import { useLocalStore } from "./store/useLocalStore";
 export default function App() {
   const [canv, setCanv] = useState<HTMLCanvasElement | null>(null);
@@ -9,7 +8,10 @@ export default function App() {
     <div className="h-screen w-screen">
       <canvas
         className=" absolute -z-10  h-screen w-screen bg-black"
-        ref={(ref) => setCanv(ref)}
+        id="canvas"
+        ref={(ref) => {
+          setCanv(ref);
+        }}
         width={window.innerWidth}
         height={window.innerHeight}
       ></canvas>
