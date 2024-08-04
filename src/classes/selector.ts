@@ -8,13 +8,16 @@ export class Selector extends Main {
   selectY: number = 0;
   selectX2: number = 0;
   selectY2: number = 0;
-  resize_height: number = 0;
-  resize_width: number = 0;
   show: boolean = true;
   lastWidth: number = 0;
   lastHeight: number = 0;
-  constructor(x: number, y: number) {
-    super(x, y);
+  colorId: string = "rgb(0,160,255)";
+  constructor(
+    x: number,
+    y: number,
+    color: [r: number, g: number, b: number, a?: number],
+  ) {
+    super(x, y, color);
   }
 
   move(mouseMoveX: number, mouseMoveY: number) {
@@ -24,67 +27,31 @@ export class Selector extends Main {
     this.y = mouseMoveY - this.selectY;
     this.x2 = this.x + width;
     this.y2 = this.y + height;
-
     this.calcTBLR();
     return this;
   }
-
-  resize({
-    x,
-    y,
-    x2,
-    y2,
-  }: {
-    x?: number;
-    y?: number;
-    x2?: number;
-    y2?: number;
-  }) {
-    if (x) this.x = x;
-    if (y) this.y = y;
-    if (x2) this.x2 = x2;
-    if (y2) this.y2 = y2;
-    this.calcTBLR();
-  }
-  draw(
-    ctx: CanvasRenderingContext2D | null | undefined,
-    hitctx: CanvasRenderingContext2D | null | undefined,
-    hue: number,
-  ) {
-    if (!this.show) return this;
-    hitctx?.beginPath();
-    hitctx!.strokeStyle = `hsl(${hue + 100},100%,50%)`;
-    hitctx!.lineWidth = 1;
-    hitctx?.setLineDash([2]);
-    hitctx?.strokeRect(
-      this.x + 100,
-      this.y,
-      this.x2 - this.x,
-      this.y2 - this.y,
+  draw(ctx: CanvasRenderingContext2D | null | undefined) {
+    this.drawCanv(
+      ctx,
+      `rgba(${this.color[0]},${this.color[1]} ,${this.color[2]})`,
     );
-    hitctx?.stroke();
-    ctx?.beginPath();
-    ctx!.strokeStyle = `hsl(${hue - 100},100%,50%)`;
+    return this;
+  }
+  hitDraw(ctx: CanvasRenderingContext2D | null | undefined) {
+    ctx!.fillStyle = this.colorId;
     ctx!.lineWidth = 1;
     ctx?.setLineDash([2]);
-    ctx?.strokeRect(this.x, this.y, this.x2 - this.x, this.y2 - this.y);
-    ctx?.stroke();
+    ctx?.fillRect(this.x, this.y, this.x2 - this.x, this.y2 - this.y);
+    ctx?.fill();
     return this;
   }
-  select(
+  private drawCanv(
     ctx: CanvasRenderingContext2D | null | undefined,
-    hitctx: CanvasRenderingContext2D | null | undefined,
-    hue: number,
+    color: string,
   ) {
-    hitctx?.beginPath();
-    hitctx!.strokeStyle = `hsl(${hue + 100},100%,50%)`;
-    hitctx!.lineWidth = 1;
-    hitctx?.setLineDash([2]);
-    hitctx?.strokeRect(this.x, this.y, this.x2 - this.x, this.y2 - this.y);
-    hitctx?.stroke();
     if (!this.show) return this;
     ctx?.beginPath();
-    ctx!.strokeStyle = `hsl(${hue},100%,50%)`;
+    ctx!.strokeStyle = color;
     ctx!.lineWidth = 1;
     ctx?.setLineDash([2]);
     ctx?.strokeRect(this.x, this.y, this.x2 - this.x, this.y2 - this.y);

@@ -3,32 +3,32 @@
 @tailwind utilities;
 
 * {
-   margin: 0;
-   padding: 0;
-   box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 body {
-   color: white;
-   width: 100dvw;
-   overflow-x: hidden;
-   height: 100%;
-   background: #ffffff;
-   border-color: #3b3b3b;
-   user-select: none;
+  color: white;
+  width: 100dvw;
+  overflow-x: hidden;
+  height: 100%;
+  background: rgb(255, 255, 255);
+  border-color: #3b3b3b;
+  user-select: none;
 }
 
 canvas {
-   touch-action: none;
+  touch-action: none;
 }
 
 .screen-max-width {
-   margin-inline-start: auto;
-   margin-inline-end: auto;
-   position: relative;
-   max-width: 1120px;
+  margin-inline-start: auto;
+  margin-inline-end: auto;
+  position: relative;
+  max-width: 1120px;
 }
 ::-webkit-scrollbar {
-   width: 0px;
-   height: 0px;
+  width: 0px;
+  height: 0px;
 }

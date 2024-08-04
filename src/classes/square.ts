@@ -8,29 +8,13 @@ export class Square extends Main {
   selectY: number = 0;
   selectX2: number = 0;
   selectY2: number = 0;
-  resize_height: number = 0;
-  resize_width: number = 0;
-  constructor(x: number, y: number) {
-    super(x, y);
-  }
-
-  resize({
-    x,
-    y,
-    x2,
-    y2,
-  }: {
-    x?: number;
-    y?: number;
-    x2?: number;
-    y2?: number;
-    scale?: number;
-  }) {
-    if (x) this.x = x;
-    if (y) this.y = y;
-    if (x2) this.x2 = x2;
-    if (y2) this.y2 = y2;
-    this.calcTBLR();
+  colorId: string = "rgba(0,0,0)";
+  constructor(
+    x: number,
+    y: number,
+    color: [r: number, g: number, b: number, a?: number],
+  ) {
+    super(x, y, color);
   }
   move(mouseMoveX: number, mouseMoveY: number) {
     const width = this.x2 - this.x;
@@ -43,14 +27,26 @@ export class Square extends Main {
     this.calcTBLR();
     return this;
   }
-  draw(
+  draw(ctx: CanvasRenderingContext2D | null | undefined) {
+    ctx!.lineWidth = 1;
+    this.drawCanv(
+      ctx,
+      `rgba(${this.color[0]},${this.color[1]} ,${this.color[2]})`,
+    );
+    return this;
+  }
+  hitDraw(ctx: CanvasRenderingContext2D | null | undefined) {
+    ctx!.lineWidth = 10;
+    this.drawCanv(ctx, this.colorId);
+    return this;
+  }
+  private drawCanv(
     ctx: CanvasRenderingContext2D | null | undefined,
-    hitctx: CanvasRenderingContext2D | null | undefined,
-    hue: number = 2,
+    color: string,
   ) {
     ctx?.beginPath();
-    ctx!.strokeStyle = `hsl(${hue},100%,50%)`;
-    ctx!.lineWidth = 1;
+
+    ctx!.strokeStyle = color;
     ctx?.setLineDash([]);
     ctx?.strokeRect(
       this.corners.left + 5,
@@ -61,13 +57,9 @@ export class Square extends Main {
     ctx?.stroke();
     return this;
   }
-  select(
-    ctx: CanvasRenderingContext2D | null | undefined,
-    hitctx: CanvasRenderingContext2D | null | undefined,
-    hue: number = 0,
-  ) {
+  select(ctx: CanvasRenderingContext2D | null | undefined) {
     ctx?.beginPath();
-    ctx!.strokeStyle = `hsl(${hue},100%,50%)`;
+    ctx!.strokeStyle = `hsl(160,100%,50%)`;
     ctx!.lineWidth = 1;
     ctx?.setLineDash([5, 10]);
     ctx?.strokeRect(

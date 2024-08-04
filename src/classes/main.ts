@@ -11,13 +11,19 @@ export class Main {
     left: 0,
     right: 0,
   };
-  constructor(x: number, y: number) {
+  color: [r: number, g: number, b: number, a?: number];
+  constructor(
+    x: number,
+    y: number,
+    color: [r: number, g: number, b: number, a?: number],
+  ) {
     this.baseX = x;
     this.baseY = y;
     this.x = x;
     this.y = y;
     this.x2 = x;
     this.y2 = y;
+    this.color = color;
   }
   update(x: number, y: number) {
     if (x > this.baseX) {
@@ -53,5 +59,22 @@ export class Main {
       this.corners.top = this.y2;
       this.corners.bottom = this.y;
     }
+  }
+  resize({
+    x,
+    y,
+    x2,
+    y2,
+  }: {
+    x?: number;
+    y?: number;
+    x2?: number;
+    y2?: number;
+  }) {
+    if (x) this.x = x;
+    if (y) this.y = y;
+    if (x2) this.x2 = x2;
+    if (y2) this.y2 = y2;
+    this.calcTBLR();
   }
 }

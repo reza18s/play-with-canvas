@@ -1,6 +1,6 @@
 import { useState } from "react";
-import Canvas from "./board/Square";
 import { useLocalStore } from "./store/useLocalStore";
+import Canvas from "./board/Canvas";
 export default function App() {
   const [canv, setCanv] = useState<HTMLCanvasElement | null>(null);
   const { setCanvasType } = useLocalStore((state) => state);

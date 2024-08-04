@@ -12,6 +12,7 @@ import {
 } from "../types/types";
 import { Selector } from "../classes/selector";
 import { resizeHelper } from "../helpers/resize";
+import { generateColorId } from "../helpers/generateColorId";
 
 export default function Canvas({
   canv,
@@ -35,6 +36,8 @@ export default function Canvas({
   let move: boolean = false;
   let resize: IResize | null = null;
   let cursorIcon: ICursorIcon;
+  const colorIds: { [key: string]: ISelectItem | Selector } = {};
+
   Hooks.Resize(canv);
   Hooks.useAddEventListener("mousemove", (event: MouseEvent) => {
     // to update the size off square when the client draws
@@ -49,153 +52,165 @@ export default function Canvas({
       selector?.move(event.x, event.y);
     }
     // to change the icon off the cursor (it can use to check there is item or not )
-    if (getCanvasType() === "move") {
-      if (move) {
-        document.body.style.cursor = "move";
-      } else if (resize) {
-        document.body.style.cursor = cursorIcon;
-      } else {
-        const { cursorType } = SelectChecker({
-          Items,
-          event,
-          selectedItem: selectedItems,
-          selector,
-        });
-        if (cursorType!) {
-          document.body.style.cursor = cursorType;
-        }
-      }
-    }
+    // if (getCanvasType() === "move") {
+    //   if (move) {
+    //     document.body.style.cursor = "move";
+    //   } else if (resize) {
+    //     document.body.style.cursor = cursorIcon;
+    //   } else {
+    //     const { cursorType } = SelectChecker({
+    //       hitctx,
+    //       colorIds,
+    //       event,
+    //       selectedItem: selectedItems,
+    //       selector,
+    //     });
+    //     if (cursorType!) {
+    //       document.body.style.cursor = cursorType;
+    //     }
+    //   }
+    // }
     // to handel resize event
-    if (getCanvasType() === "move" && resize) {
-      switch (resize) {
-        case "resize-top":
-          if (selector) {
-            selector?.resize({ y: event.y - selector.selectY });
-            resizeHelper.ResizeGroup({ selectedItems, selector, type: "y" });
-          } else {
-            selectedItems.map((item) => {
-              item.resize({
-                y: event.y,
-              });
-            });
-          }
-          break;
-        case "resize-bottom":
-          if (selector) {
-            selector?.resize({ y2: event.y + selector.selectY2 });
-            resizeHelper.ResizeGroup({ selectedItems, selector, type: "y" });
-          } else {
-            selectedItems.map((item) => {
-              item.resize({
-                y2: event.y,
-              });
-            });
-          }
-          break;
-        case "resize-left":
-          if (selector) {
-            selector?.resize({ x: event.x + selector.selectX });
-            resizeHelper.ResizeGroup({ selectedItems, selector, type: "x" });
-          } else {
-            selectedItems.map((item) => {
-              item.resize({
-                x: event.x,
-              });
-            });
-          }
-          break;
-        case "resize-right":
-          if (selector) {
-            selector?.resize({ x2: event.x + selector.selectX2 });
-            resizeHelper.ResizeGroup({ selectedItems, selector, type: "x" });
-          } else {
-            selectedItems.map((item) => {
-              item.resize({
-                x2: event.x,
-              });
-            });
-          }
-          break;
-        case "resize-top-left":
-          if (selector) {
-            selector?.resize({
-              x: event.x + selector.selectX,
-              y: event.y - selector.selectY,
-            });
-            resizeHelper.ResizeGroup({ selectedItems, selector, type: "xy" });
-          } else {
-            selectedItems.map((item) => {
-              item.resize({
-                y: event.y,
-                x: event.x,
-              });
-            });
-          }
-          break;
-        case "resize-top-right":
-          if (selector) {
-            selector?.resize({
-              x2: event.x + selector.selectX2,
-              y: event.y - selector.selectY,
-            });
-            resizeHelper.ResizeGroup({ selectedItems, selector, type: "xy" });
-          } else {
-            selectedItems.map((item) => {
-              item.resize({
-                y: event.y,
-                x2: event.x,
-              });
-            });
-          }
-          break;
-        case "resize-bottom-left":
-          if (selector) {
-            selector?.resize({
-              x: event.x + selector.selectX,
-              y2: event.y - selector.selectY2,
-            });
-            resizeHelper.ResizeGroup({ selectedItems, selector, type: "xy" });
-          } else {
-            selectedItems.map((item) => {
-              item.resize({
-                y2: event.y,
-                x: event.x,
-              });
-            });
-          }
-          break;
-        case "resize-bottom-right":
-          if (selector) {
-            selector?.resize({
-              x2: event.x + selector.selectX2,
-              y2: event.y - selector.selectY2,
-            });
-            resizeHelper.ResizeGroup({ selectedItems, selector, type: "xy" });
-          } else {
-            selectedItems.map((item) => {
-              item.resize({
-                y2: event.y,
-                x2: event.x,
-              });
-            });
-          }
-          break;
-      }
-    }
+    // if (getCanvasType() === "move" && resize) {
+    //   switch (resize) {
+    //     case "resize-top":
+    //       if (selector) {
+    //         selector?.resize({ y: event.y - selector.selectY });
+    //         resizeHelper.ResizeGroup({ selectedItems, selector, type: "y" });
+    //       } else {
+    //         selectedItems.map((item) => {
+    //           item.resize({
+    //             y: event.y,
+    //           });
+    //         });
+    //       }
+    //       break;
+    //     case "resize-bottom":
+    //       if (selector) {
+    //         selector?.resize({ y2: event.y + selector.selectY2 });
+    //         resizeHelper.ResizeGroup({ selectedItems, selector, type: "y" });
+    //       } else {
+    //         selectedItems.map((item) => {
+    //           item.resize({
+    //             y2: event.y,
+    //           });
+    //         });
+    //       }
+    //       break;
+    //     case "resize-left":
+    //       if (selector) {
+    //         selector?.resize({ x: event.x + selector.selectX });
+    //         resizeHelper.ResizeGroup({ selectedItems, selector, type: "x" });
+    //       } else {
+    //         selectedItems.map((item) => {
+    //           item.resize({
+    //             x: event.x,
+    //           });
+    //         });
+    //       }
+    //       break;
+    //     case "resize-right":
+    //       if (selector) {
+    //         selector?.resize({ x2: event.x + selector.selectX2 });
+    //         resizeHelper.ResizeGroup({ selectedItems, selector, type: "x" });
+    //       } else {
+    //         selectedItems.map((item) => {
+    //           item.resize({
+    //             x2: event.x,
+    //           });
+    //         });
+    //       }
+    //       break;
+    //     case "resize-top-left":
+    //       if (selector) {
+    //         selector?.resize({
+    //           x: event.x + selector.selectX,
+    //           y: event.y - selector.selectY,
+    //         });
+    //         resizeHelper.ResizeGroup({ selectedItems, selector, type: "xy" });
+    //       } else {
+    //         selectedItems.map((item) => {
+    //           item.resize({
+    //             y: event.y,
+    //             x: event.x,
+    //           });
+    //         });
+    //       }
+    //       break;
+    //     case "resize-top-right":
+    //       if (selector) {
+    //         selector?.resize({
+    //           x2: event.x + selector.selectX2,
+    //           y: event.y - selector.selectY,
+    //         });
+    //         resizeHelper.ResizeGroup({ selectedItems, selector, type: "xy" });
+    //       } else {
+    //         selectedItems.map((item) => {
+    //           item.resize({
+    //             y: event.y,
+    //             x2: event.x,
+    //           });
+    //         });
+    //       }
+    //       break;
+    //     case "resize-bottom-left":
+    //       if (selector) {
+    //         selector?.resize({
+    //           x: event.x + selector.selectX,
+    //           y2: event.y - selector.selectY2,
+    //         });
+    //         resizeHelper.ResizeGroup({ selectedItems, selector, type: "xy" });
+    //       } else {
+    //         selectedItems.map((item) => {
+    //           item.resize({
+    //             y2: event.y,
+    //             x: event.x,
+    //           });
+    //         });
+    //       }
+    //       break;
+    //     case "resize-bottom-right":
+    //       if (selector) {
+    //         selector?.resize({
+    //           x2: event.x + selector.selectX2,
+    //           y2: event.y - selector.selectY2,
+    //         });
+    //         resizeHelper.ResizeGroup({ selectedItems, selector, type: "xy" });
+    //       } else {
+    //         selectedItems.map((item) => {
+    //           item.resize({
+    //             y2: event.y,
+    //             x2: event.x,
+    //           });
+    //         });
+    //       }
+    //       break;
+    //   }
+    // }
     // to update the size off select square
     if (select) select.update(event.x, event.y);
   });
+  // Hooks.useAddEventListener("click", (event: MouseEvent) => {
+  //   const pixel = hitctx!.getImageData(event.x, event.y, 1, 1).data;
+  //   console.log(pixel);
+  //   const color = `rgb(${pixel[0]},${pixel[1]},${pixel[2]})`;
+  //   const shape = colorIds[color];
+  //   if (shape) {
+  //     alert("click on circle: " + shape.id);
+  //   }
+  // });
   Hooks.useAddEventListener("mousedown", (event: MouseEvent) => {
     // to save the position and draw the square
     if (getCanvasType() === "square") {
       isDrawing = true;
-      newItem = new Square(event.x, event.y);
+      newItem = new Square(event.x, event.y, [255, 0, 25]);
+      newItem.colorId = generateColorId(colorIds, newItem);
     }
     // to move the item
     if (getCanvasType() === "move") {
       const { selectItem, selectStates, cursorType } = SelectChecker({
-        Items,
+        colorIds,
+        hitctx,
         event,
         selectedItem: selectedItems,
         selector,
@@ -306,7 +321,7 @@ export default function Canvas({
         selector_left: number,
         selector_right: number;
       let showSelector = true;
-      selectedItems = Items.filter((square, index) => {
+      selectedItems = Items.filter((square) => {
         // it will check for item witch is inside the select and return it
         if (
           square.corners.top > select!.corners.top &&
@@ -359,15 +374,15 @@ export default function Canvas({
         }
       });
       if (selectedItems.length > 1) {
-        selector = new Selector(selector_left!, selector_top!).update(
-          selector_right!,
-          selector_bottom!,
-        );
+        selector = new Selector(
+          selector_left!,
+          selector_top!,
+          [0, 50, 255],
+        ).update(selector_right!, selector_bottom!);
         selector.show = showSelector;
       }
       select = null;
     }
-    console.log(Items);
     move = false;
   });
   const Animation = () => {
@@ -375,15 +390,15 @@ export default function Canvas({
     ctx?.clearRect(0, 0, canv!.width, canv!.height);
     if (Items) {
       Items.map((square) => {
-        square.draw(ctx, hitctx, 0);
+        square.draw(ctx).hitDraw(hitctx);
       });
     }
     selectedItems.map((square) => {
-      square.select(ctx, hitctx, 160);
+      square.select(ctx);
     });
-    select?.draw(ctx, hitctx, 190);
-    selector?.draw(ctx, hitctx, 190);
-    newItem?.draw(ctx, hitctx, 0);
+    select?.draw(ctx);
+    newItem?.draw(ctx).hitDraw(hitctx);
+    selector?.draw(ctx).hitDraw(hitctx);
     requestRef.current = requestAnimationFrame(() => Animation());
   };
   useEffect(() => {
