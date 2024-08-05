@@ -44,6 +44,19 @@ export class Square extends Main {
     ctx: CanvasRenderingContext2D | null | undefined,
     color: string,
   ) {
+    const x = this.x + (this.x2 - this.x) / 2;
+    const y = this.y + (this.y2 - this.y) / 2;
+    const length = Math.sqrt(
+      (this.x2 - this.x) * (this.x2 - this.x) +
+        (this.y2 - this.y) * (this.y2 - this.y),
+    );
+    const x2 = x + (length / 2) * Math.cos((45 * Math.PI) / 180.0);
+    const y2 = y + (length / 2) * Math.sin((45 * Math.PI) / 180.0);
+    ctx?.beginPath();
+    ctx?.moveTo(x, y);
+    ctx?.lineTo(x2, y2);
+    ctx?.stroke();
+    console.log(x2, y2);
     ctx?.beginPath();
     ctx!.strokeStyle = color;
     ctx?.setLineDash([]);
