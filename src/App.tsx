@@ -22,6 +22,13 @@ export default function App() {
           }}
         >
           square
+        </button>{" "}
+        <button
+          onClick={() => {
+            setCanvasType("ellipse");
+          }}
+        >
+          ellipse
         </button>
       </div>
       {canv && <Canvas canv={canv} setCanv={setCanv}></Canvas>}

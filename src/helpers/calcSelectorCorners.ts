@@ -9,7 +9,7 @@ export const calcSelectorCorners = (selectedItems: ISelectItems) => {
 
   selectedItems.map((Item, index) => {
     // it will check the maximum corners belong to one item and if that true it wont show the selector
-    if (index == 0) return;
+
     if (
       Item.corners.top < selector_top ||
       Item.corners.bottom > selector_bottom ||

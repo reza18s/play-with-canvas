@@ -1,7 +1,8 @@
+import { Ellipse } from "../classes/ellipse";
 import { Square } from "../classes/square";
 
-export type ICanvasType = "move" | "square";
-export type ISelectItem = Square;
+export type ICanvasType = "move" | "square" | "ellipse";
+export type ISelectItem = Square | Ellipse;
 export type ISelectItems = ISelectItem[];
 export type IResize =
   | "resize-top"

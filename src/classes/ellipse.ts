@@ -1,7 +1,7 @@
 import { v4 } from "uuid";
 import { Main } from "./main";
 
-export class Square extends Main {
+export class Ellipse extends Main {
   readonly id = v4();
   readonly type = "square";
   selectX: number = 0;
@@ -44,15 +44,19 @@ export class Square extends Main {
     ctx: CanvasRenderingContext2D | null | undefined,
     color: string,
   ) {
+    const Radius = (this.corners.right - this.corners.left) / 2;
+    const Radius2 = (this.corners.bottom - this.corners.top) / 2;
     ctx?.beginPath();
     ctx!.strokeStyle = color;
     ctx?.setLineDash([]);
-    ctx?.roundRect(
-      this.corners.left + 5,
-      this.corners.top + 5,
-      this.corners.right - this.corners.left - 10,
-      this.corners.bottom - this.corners.top - 10,
-      [15],
+    ctx?.ellipse(
+      this.corners.left + (this.corners.right - this.corners.left) / 2,
+      this.corners.top + (this.corners.bottom - this.corners.top) / 2,
+      Radius - 5 < 0 ? 0 : Radius - 5,
+      Radius2 - 5 < 0 ? 0 : Radius2 - 5,
+      Math.PI,
+      0,
+      Math.PI * 2,
     );
     ctx?.stroke();
     return this;

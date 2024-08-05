@@ -41,7 +41,12 @@ export class Selector extends Main {
     ctx!.fillStyle = this.colorId;
     ctx!.lineWidth = 1;
     ctx?.setLineDash([2]);
-    ctx?.fillRect(this.x, this.y, this.x2 - this.x, this.y2 - this.y);
+    ctx?.fillRect(
+      this.x - 5,
+      this.y - 5,
+      this.x2 - this.x + 10,
+      this.y2 - this.y + 10,
+    );
     ctx?.fill();
     return this;
   }

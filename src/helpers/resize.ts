@@ -1,5 +1,5 @@
 import { Selector } from "../classes/selector";
-import { ISelectItem } from "../types/types";
+import { ICursorIcon, IResize, ISelectItem } from "../types/types";
 
 export const resizeHelper = {
   ResizeGroup: ({
@@ -54,5 +54,45 @@ export const resizeHelper = {
         });
       }
     });
+  },
+  resizeState: ({
+    onTop,
+    onLeft,
+    onRight,
+    onBottom,
+  }: {
+    onTop: boolean;
+    onLeft: boolean;
+    onRight: boolean;
+    onBottom: boolean;
+  }) => {
+    let selectStates: IResize | "notFound" = "notFound";
+    let cursorType: ICursorIcon = "auto";
+    if (onTop && onLeft) {
+      selectStates = "resize-top-left";
+      cursorType = "nwse-resize";
+    } else if (onTop && onRight) {
+      selectStates = "resize-top-right";
+      cursorType = "nesw-resize";
+    } else if (onBottom && onLeft) {
+      selectStates = "resize-bottom-left";
+      cursorType = "nesw-resize";
+    } else if (onBottom && onRight) {
+      selectStates = "resize-bottom-right";
+      cursorType = "nwse-resize";
+    } else if (onTop) {
+      selectStates = "resize-top";
+      cursorType = "row-resize";
+    } else if (onLeft) {
+      selectStates = "resize-left";
+      cursorType = "col-resize";
+    } else if (onBottom) {
+      selectStates = "resize-bottom";
+      cursorType = "row-resize";
+    } else if (onRight) {
+      selectStates = "resize-right";
+      cursorType = "col-resize";
+    }
+    return { selectStates, cursorType };
   },
 };

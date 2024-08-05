@@ -15,6 +15,7 @@ import { resizeHelper } from "../helpers/resize";
 import { generateColorId } from "../helpers/generateColorId";
 import { Inside } from "../helpers/isInside";
 import { calcSelectorCorners } from "../helpers/calcSelectorCorners";
+import { Ellipse } from "../classes/ellipse";
 
 export default function Canvas({
   canv,
@@ -43,7 +44,11 @@ export default function Canvas({
   Hooks.Resize(canv);
   Hooks.useAddEventListener("mousemove", (event: MouseEvent) => {
     // to update the size off square when the client draws
-    if (getCanvasType() == "square" && Items && isDrawing) {
+    if (
+      (getCanvasType() == "square" || getCanvasType() == "ellipse") &&
+      Items &&
+      isDrawing
+    ) {
       newItem?.update(event.x, event.y);
     }
     // to move the selected item
@@ -53,6 +58,142 @@ export default function Canvas({
       });
       selector?.move(event.x, event.y);
     }
+    // to change the icon off the cursor (it can use to check there is item or not )
+    if (getCanvasType() === "move") {
+      if (move) {
+        document.body.style.cursor = "move";
+      } else if (resize) {
+        document.body.style.cursor = cursorIcon;
+      } else {
+        const { cursorType } = SelectChecker({
+          hitctx,
+          colorIds,
+          event,
+          selectedItems,
+          selector,
+        });
+        if (cursorType!) {
+          document.body.style.cursor = cursorType;
+        }
+      }
+    }
+    // to handel resize event
+    if (getCanvasType() === "move" && resize) {
+      switch (resize) {
+        case "resize-top":
+          if (selector) {
+            selector?.resize({ y: event.y - selector.selectY });
+            resizeHelper.ResizeGroup({ selectedItems, selector, type: "y" });
+          } else {
+            selectedItems.map((item) => {
+              item.resize({
+                y: event.y,
+              });
+            });
+          }
+          break;
+        case "resize-bottom":
+          if (selector) {
+            selector?.resize({ y2: event.y + selector.selectY2 });
+            resizeHelper.ResizeGroup({ selectedItems, selector, type: "y" });
+          } else {
+            selectedItems.map((item) => {
+              item.resize({
+                y2: event.y,
+              });
+            });
+          }
+          break;
+        case "resize-left":
+          if (selector) {
+            selector?.resize({ x: event.x + selector.selectX });
+            resizeHelper.ResizeGroup({ selectedItems, selector, type: "x" });
+          } else {
+            selectedItems.map((item) => {
+              item.resize({
+                x: event.x,
+              });
+            });
+          }
+          break;
+        case "resize-right":
+          if (selector) {
+            selector?.resize({ x2: event.x + selector.selectX2 });
+            resizeHelper.ResizeGroup({ selectedItems, selector, type: "x" });
+          } else {
+            selectedItems.map((item) => {
+              item.resize({
+                x2: event.x,
+              });
+            });
+          }
+          break;
+        case "resize-top-left":
+          if (selector) {
+            selector?.resize({
+              x: event.x + selector.selectX,
+              y: event.y - selector.selectY,
+            });
+            resizeHelper.ResizeGroup({ selectedItems, selector, type: "xy" });
+          } else {
+            selectedItems.map((item) => {
+              item.resize({
+                y: event.y,
+                x: event.x,
+              });
+            });
+          }
+          break;
+        case "resize-top-right":
+          if (selector) {
+            selector?.resize({
+              x2: event.x + selector.selectX2,
+              y: event.y - selector.selectY,
+            });
+            resizeHelper.ResizeGroup({ selectedItems, selector, type: "xy" });
+          } else {
+            selectedItems.map((item) => {
+              item.resize({
+                y: event.y,
+                x2: event.x,
+              });
+            });
+          }
+          break;
+        case "resize-bottom-left":
+          if (selector) {
+            selector?.resize({
+              x: event.x + selector.selectX,
+              y2: event.y - selector.selectY2,
+            });
+            resizeHelper.ResizeGroup({ selectedItems, selector, type: "xy" });
+          } else {
+            selectedItems.map((item) => {
+              item.resize({
+                y2: event.y,
+                x: event.x,
+              });
+            });
+          }
+          break;
+        case "resize-bottom-right":
+          if (selector) {
+            selector?.resize({
+              x2: event.x + selector.selectX2,
+              y2: event.y - selector.selectY2,
+            });
+            resizeHelper.ResizeGroup({ selectedItems, selector, type: "xy" });
+          } else {
+            selectedItems.map((item) => {
+              item.resize({
+                y2: event.y,
+                x2: event.x,
+              });
+            });
+          }
+          break;
+      }
+    }
     if (select) select.update(event.x, event.y);
   });
   Hooks.useAddEventListener("mousedown", (event: MouseEvent) => {
@@ -60,6 +201,11 @@ export default function Canvas({
     if (getCanvasType() === "square") {
       isDrawing = true;
       newItem = new Square(event.x, event.y, [255, 0, 25]);
+      newItem.colorId = generateColorId(colorIds, newItem);
+    } // to save the position and draw the square
+    if (getCanvasType() === "ellipse") {
+      isDrawing = true;
+      newItem = new Ellipse(event.x, event.y, [255, 0, 25]);
       newItem.colorId = generateColorId(colorIds, newItem);
     }
     // to move the item
@@ -96,6 +242,30 @@ export default function Canvas({
             move = true;
             selectedItems = [selectItem!];
             break;
+          case "resize-top":
+          case "resize-bottom":
+          case "resize-left":
+          case "resize-right":
+          case "resize-top-left":
+          case "resize-top-right":
+          case "resize-bottom-left":
+          case "resize-bottom-right":
+            selectedItems?.map((item) => {
+              item.selectX = item.x - event.x;
+              item.selectY = item.y - event.y;
+              item.selectX2 = item.x2 - event.x;
+              item.selectY2 = item.y2 - event.y;
+            });
+            if (selector) {
+              selector.selectX = selector.x - event.x;
+              selector.selectY = selector.y - event.y;
+              selector.selectX2 = selector.x2 - event.x;
+              selector.selectY2 = selector.y2 - event.y;
+              selector!.lastWidth = selector!.x2 - selector!.x;
+              selector!.lastHeight = selector!.y2 - selector!.y;
+            }
+            cursorIcon = cursorType;
+            resize = selectStates;
         }
       }
     }
@@ -192,6 +362,7 @@ export default function Canvas({
     selector?.draw(ctx).hitDraw(hitctx);
     requestRef.current = requestAnimationFrame(() => Animation());
   };
+  console.log(performance.now());
   useEffect(() => {
     requestRef.current = requestAnimationFrame(Animation);
     return () => {

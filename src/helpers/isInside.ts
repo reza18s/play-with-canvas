@@ -1,4 +1,5 @@
 import { Select } from "../classes/select";
+import { Selector } from "../classes/selector";
 import { ISelectItem } from "../types/types";
 
 export const Inside = {
@@ -7,7 +8,7 @@ export const Inside = {
     event,
     offset = 10,
   }: {
-    Item: ISelectItem;
+    Item: ISelectItem | Selector;
     event: MouseEvent;
     offset?: number;
   }) => {
