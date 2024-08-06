@@ -44,6 +44,7 @@ export class Ellipse extends Main {
     ctx: CanvasRenderingContext2D | null | undefined,
     color: string,
   ) {
+    ctx?.save();
     const Radius = (this.corners.right - this.corners.left) / 2;
     const Radius2 = (this.corners.bottom - this.corners.top) / 2;
     ctx?.beginPath();
@@ -59,9 +60,11 @@ export class Ellipse extends Main {
       Math.PI * 2,
     );
     ctx?.stroke();
+    ctx?.restore();
     return this;
   }
   select(ctx: CanvasRenderingContext2D | null | undefined) {
+    ctx?.save();
     ctx?.beginPath();
     ctx!.strokeStyle = `hsl(160,100%,50%)`;
     ctx!.lineWidth = 1;
@@ -73,6 +76,7 @@ export class Ellipse extends Main {
       this.corners.bottom - this.corners.top,
     );
     ctx?.stroke();
+    ctx?.restore();
     return this;
   }
 }

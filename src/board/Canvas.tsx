@@ -37,7 +37,7 @@ export default function Canvas({
   let select: Select | null;
   let selector: Selector | null;
   let move: boolean = false;
-  let resize: IResize | null = null;
+  let resize: IResize | "rotate" | null = null;
   let cursorIcon: ICursorIcon;
   const colorIds: { [key: string]: ISelectItem | Selector } = {};
 
@@ -80,9 +80,17 @@ export default function Canvas({
     // to handel resize event
     if (getCanvasType() === "move" && resize) {
       switch (resize) {
+        case "rotate":
+          if (selector) {
+            selector.setRotate(event.x, event.y);
+            selectedItems.map((item) => {
+              item.rotate = selector!.rotate;
+            });
+          }
+          break;
         case "resize-top":
           if (selector) {
-            selector?.resize({ y: event.y - selector.selectY });
+            selector?.resize({ y: event.y + selector.selectY });
             resizeHelper.ResizeGroup({ selectedItems, selector, type: "y" });
           } else {
             selectedItems.map((item) => {
@@ -132,7 +140,7 @@ export default function Canvas({
           if (selector) {
             selector?.resize({
               x: event.x + selector.selectX,
-              y: event.y - selector.selectY,
+              y: event.y + selector.selectY,
             });
             resizeHelper.ResizeGroup({ selectedItems, selector, type: "xy" });
           } else {
@@ -148,7 +156,7 @@ export default function Canvas({
           if (selector) {
             selector?.resize({
               x2: event.x + selector.selectX2,
-              y: event.y - selector.selectY,
+              y: event.y + selector.selectY,
             });
             resizeHelper.ResizeGroup({ selectedItems, selector, type: "xy" });
           } else {
@@ -164,7 +172,7 @@ export default function Canvas({
           if (selector) {
             selector?.resize({
               x: event.x + selector.selectX,
-              y2: event.y - selector.selectY2,
+              y2: event.y + selector.selectY2,
             });
             resizeHelper.ResizeGroup({ selectedItems, selector, type: "xy" });
           } else {
@@ -180,7 +188,7 @@ export default function Canvas({
           if (selector) {
             selector?.resize({
               x2: event.x + selector.selectX2,
-              y2: event.y - selector.selectY2,
+              y2: event.y + selector.selectY2,
             });
             resizeHelper.ResizeGroup({ selectedItems, selector, type: "xy" });
           } else {
@@ -241,7 +249,16 @@ export default function Canvas({
             selectItem!.selectY = event.y - selectItem!.y;
             move = true;
             selectedItems = [selectItem!];
+            console.log("fuck");
+            selector = new Selector(
+              selectItem!.corners.left,
+              selectItem!.corners.top,
+              [0, 50, 255],
+            ).update(selectItem!.corners.right, selectItem!.corners.bottom);
+            selector.rotate = selectItem!.rotate;
+            selector.show = false;
             break;
+          case "rotate":
           case "resize-top":
           case "resize-bottom":
           case "resize-left":
@@ -319,11 +336,13 @@ export default function Canvas({
       select = null;
     }
     if (selectedItems.length === 1) {
+      console.log(selectedItems[0]);
       selector = new Selector(
-        selectedItems[0].corners.left,
-        selectedItems[0].corners.top,
+        selectedItems[0].x,
+        selectedItems[0].y,
         [0, 50, 255],
-      ).update(selectedItems[0].corners.right, selectedItems[0].corners.bottom);
+      ).update(selectedItems[0].x2, selectedItems[0].y2);
+      selector.rotate = selectedItems[0].rotate;
       selector.show = false;
     } else if (selectedItems.length > 1) {
       const {
@@ -352,6 +371,7 @@ export default function Canvas({
     if (Items) {
       Items.map((square) => {
         square.draw(ctx).hitDraw(hitctx);
+        // console.log(square.getBoundaries(ctx));
       });
     }
     selectedItems.map((square) => {
@@ -362,7 +382,6 @@ export default function Canvas({
     selector?.draw(ctx).hitDraw(hitctx);
     requestRef.current = requestAnimationFrame(() => Animation());
   };
-  console.log(performance.now());
   useEffect(() => {
     requestRef.current = requestAnimationFrame(Animation);
     return () => {
