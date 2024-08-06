@@ -15,6 +15,7 @@ export type IResize =
   | "resize-bottom-right";
 export type ICursorIcon =
   | "auto"
+  | "grab"
   | "move"
   | "col-resize"
   | "row-resize"

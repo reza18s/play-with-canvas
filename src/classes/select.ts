@@ -9,6 +9,7 @@ export class Select extends Main {
   }
 
   draw(ctx: CanvasRenderingContext2D | null | undefined) {
+    ctx?.save();
     ctx?.beginPath();
     ctx!.strokeStyle = `rgba(${this.color[0]},${this.color[1]} ,${this.color[2]})`;
     ctx!.lineWidth = 1;
@@ -19,6 +20,7 @@ export class Select extends Main {
     ctx!.fillStyle = `rgba(${this.color[0]},${this.color[1]} ,${this.color[2]},0.2)`;
     ctx?.fillRect(this.x, this.y, this.x2 - this.x, this.y2 - this.y);
     ctx?.fill();
+    ctx?.restore();
     return this;
   }
 }

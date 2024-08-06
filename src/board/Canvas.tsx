@@ -335,13 +335,12 @@ export default function Canvas({
       });
       select = null;
     }
-    if (selectedItems.length === 1) {
-      console.log(selectedItems[0]);
+    if (selectedItems.length === 1 && !selector) {
       selector = new Selector(
-        selectedItems[0].x,
-        selectedItems[0].y,
+        selectedItems[0].corners.left,
+        selectedItems[0].corners.top,
         [0, 50, 255],
-      ).update(selectedItems[0].x2, selectedItems[0].y2);
+      ).update(selectedItems[0].corners.right, selectedItems[0].corners.bottom);
       selector.rotate = selectedItems[0].rotate;
       selector.show = false;
     } else if (selectedItems.length > 1) {
@@ -357,6 +356,7 @@ export default function Canvas({
         selector_top!,
         [0, 50, 255],
       ).update(selector_right!, selector_bottom!);
+
       selector.show = showSelector;
     }
 

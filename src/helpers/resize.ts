@@ -29,10 +29,10 @@ export const resizeHelper = {
         const itemX2 = (selector!.selectX2 - item.selectX2) * +widthPercent;
 
         item.resize({
-          y: selector!.y + +itemY,
-          y2: selector!.y2 - itemY2,
-          x: selector!.x + +itemX,
-          x2: selector!.x2 - itemX2,
+          y: selector!.y,
+          y2: selector!.y2,
+          x: selector!.x,
+          x2: selector!.x2,
         });
       } else if (type === "x") {
         const itemX = (item.selectX - selector!.selectX) * +widthPercent;

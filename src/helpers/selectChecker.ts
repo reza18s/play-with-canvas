@@ -26,8 +26,10 @@ export const SelectChecker = ({
   let selectItem: ISelectItem | null = null;
   let selectStates:
     | IResize
-    | ("move" | "moveMany" | "select" | "notFound" | "resizeMany") = "notFound";
+    | ("move" | "moveMany" | "select" | "notFound" | "resizeMany" | "rotate") =
+    "notFound";
   let cursorType: ICursorIcon = "auto";
+
   if (selectedItems.length === 0) {
     const pixel = hitctx!.getImageData(event.x, event.y, 1, 1).data;
     // console.log(pixel);
@@ -41,26 +43,14 @@ export const SelectChecker = ({
   } else if (selector) {
     const pixel = hitctx!.getImageData(event.x, event.y, 1, 1).data;
     const color = `rgb(${pixel[0]},${pixel[1]},${pixel[2]})`;
-
     // console.log(pixel);
-    if (color === selector.colorId) {
-      if (!Inside.isCursorInSquare({ Item: selector, event, offset: -10 })) {
-        const onTop = selector.corners.top + 10 > event.y;
-        const onBottom = selector.corners.bottom - 10 < event.y;
-        const onLeft = selector.corners.left + 10 > event.x;
-        const onRight = selector.corners.right - 10 < event.x;
-        const state = resizeHelper.resizeState({
-          onTop,
-          onLeft,
-          onBottom,
-          onRight,
-        });
-        selectStates = state.selectStates;
-        cursorType = state.cursorType;
-      } else {
-        selectStates = "moveMany";
-        cursorType = "move";
-      }
+    if (selector.colorIds[color]) {
+      //@ts-ignore
+      selectStates = selector.colorIds[color];
+      console.log(selector.colorIds[color]);
+    } else if (color === selector.colorId) {
+      selectStates = "moveMany";
+      cursorType = "move";
     } else {
       const shape = colorIds[color];
       if (shape) {

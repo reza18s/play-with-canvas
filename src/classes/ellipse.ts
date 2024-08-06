@@ -23,7 +23,7 @@ export class Ellipse extends Main {
     this.y = mouseMoveY - this.selectY;
     this.x2 = this.x + width;
     this.y2 = this.y + height;
-
+    this.calcCenter();
     this.calcTBLR();
     return this;
   }

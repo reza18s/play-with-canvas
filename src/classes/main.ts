@@ -12,6 +12,9 @@ export class Main {
     right: 0,
   };
   color: [r: number, g: number, b: number, a?: number];
+  rotate: number = 0;
+  centerX: number;
+  centerY: number;
   constructor(
     x: number,
     y: number,
@@ -24,6 +27,8 @@ export class Main {
     this.x2 = x;
     this.y2 = y;
     this.color = color;
+    this.centerX = this.x + (this.x2 - this.x) / 2;
+    this.centerY = this.y + (this.y2 - this.y) / 2;
   }
   update(x: number, y: number) {
     if (x > this.baseX) {
@@ -40,7 +45,7 @@ export class Main {
       this.y = y;
       this.y2 = this.baseY;
     }
-
+    this.calcCenter();
     this.calcTBLR();
     return this;
   }
@@ -76,5 +81,55 @@ export class Main {
     if (x2) this.x2 = x2;
     if (y2) this.y2 = y2;
     this.calcTBLR();
+  }
+  calcCenter() {
+    this.centerX = this.x + (this.x2 - this.x) / 2;
+    this.centerY = this.y + (this.y2 - this.y) / 2;
+  }
+  getBoundaries(ctx: CanvasRenderingContext2D | null | undefined) {
+    const centerX = this.x + (this.x2 - this.x) / 2;
+    const centerY = this.y + (this.y2 - this.y) / 2;
+    const length = Math.sqrt(
+      (this.x2 - this.x) * (this.x2 - this.x) +
+        (this.y2 - this.y) * (this.y2 - this.y),
+    );
+
+    const dx = this.x2 - this.x;
+    const dy = this.y2 - this.y;
+    const angle = Math.atan(dy / dx);
+    // const angleDeg = (angle * 180) / Math.PI;
+
+    const x2 =
+      centerX + (length / 2) * Math.cos(angle + (this.rotate * Math.PI) / 180);
+    const y2 =
+      centerY + (length / 2) * Math.sin(angle + (this.rotate * Math.PI) / 180);
+    const x3 =
+      centerX + (length / 2) * Math.cos(-angle + (this.rotate * Math.PI) / 180);
+    const y3 =
+      centerY + (length / 2) * Math.sin(-angle + (this.rotate * Math.PI) / 180);
+    const x4 =
+      centerX - (length / 2) * Math.cos(angle + (this.rotate * Math.PI) / 180);
+    const y4 =
+      centerY - (length / 2) * Math.sin(angle + (this.rotate * Math.PI) / 180);
+    const x5 =
+      centerX - (length / 2) * Math.cos(-angle + (this.rotate * Math.PI) / 180);
+    const y5 =
+      centerY - (length / 2) * Math.sin(-angle + (this.rotate * Math.PI) / 180);
+    ctx?.beginPath();
+    ctx?.moveTo(centerX, centerY);
+    ctx?.lineTo(x2, y2);
+    ctx?.moveTo(centerX, centerY);
+    ctx?.lineTo(x3, y3);
+    ctx?.moveTo(centerX, centerY);
+    ctx?.lineTo(x4, y4);
+    ctx?.moveTo(centerX, centerY);
+    ctx?.lineTo(x5, y5);
+    ctx?.stroke();
+    return {
+      top: Math.min(y2, y3, y4, y5),
+      left: Math.min(x2, x3, x4, x5),
+      bottom: Math.max(y2, y3, y4, y5),
+      right: Math.max(x2, x3, x4, x5),
+    };
   }
 }

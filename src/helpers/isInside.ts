@@ -9,7 +9,7 @@ export const Inside = {
     offset = 10,
   }: {
     Item: ISelectItem | Selector;
-    event: MouseEvent;
+    event: { x: number; y: number };
     offset?: number;
   }) => {
     if (

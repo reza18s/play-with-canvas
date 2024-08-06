@@ -23,7 +23,9 @@ export class Square extends Main {
     this.y = mouseMoveY - this.selectY;
     this.x2 = this.x + width;
     this.y2 = this.y + height;
-
+    this.centerX = this.x + (this.x2 - this.x) / 2;
+    this.centerY = this.y + (this.y2 - this.y) / 2;
+    this.calcCenter();
     this.calcTBLR();
     return this;
   }
@@ -44,20 +46,11 @@ export class Square extends Main {
     ctx: CanvasRenderingContext2D | null | undefined,
     color: string,
   ) {
-    const x = this.x + (this.x2 - this.x) / 2;
-    const y = this.y + (this.y2 - this.y) / 2;
-    const length = Math.sqrt(
-      (this.x2 - this.x) * (this.x2 - this.x) +
-        (this.y2 - this.y) * (this.y2 - this.y),
-    );
-    const x2 = x + (length / 2) * Math.cos((45 * Math.PI) / 180.0);
-    const y2 = y + (length / 2) * Math.sin((45 * Math.PI) / 180.0);
     ctx?.beginPath();
-    ctx?.moveTo(x, y);
-    ctx?.lineTo(x2, y2);
-    ctx?.stroke();
-    console.log(x2, y2);
-    ctx?.beginPath();
+    ctx?.save();
+    ctx?.translate(this.centerX, this.centerY);
+    ctx?.rotate((this.rotate * Math.PI) / 180);
+    ctx?.translate(-this.centerX, -this.centerY);
     ctx!.strokeStyle = color;
     ctx?.setLineDash([]);
     ctx?.roundRect(
@@ -68,10 +61,16 @@ export class Square extends Main {
       [15],
     );
     ctx?.stroke();
+
+    ctx?.restore();
     return this;
   }
   select(ctx: CanvasRenderingContext2D | null | undefined) {
+    ctx?.save();
     ctx?.beginPath();
+    ctx?.translate(this.centerX, this.centerY);
+    ctx?.rotate((this.rotate * Math.PI) / 180);
+    ctx?.translate(-this.centerX, -this.centerY);
     ctx!.strokeStyle = `hsl(160,100%,50%)`;
     ctx!.lineWidth = 1;
     ctx?.setLineDash([5, 10]);
@@ -82,6 +81,7 @@ export class Square extends Main {
       this.corners.bottom - this.corners.top,
     );
     ctx?.stroke();
+    ctx?.restore();
     return this;
   }
 }
