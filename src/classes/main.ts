@@ -49,19 +49,13 @@ export class Main {
     this.calcTBLR();
     return this;
   }
-  setRotate(
-    x: number,
-    y: number,
-    centerX: number,
-    centerY: number,
-    ctx: CanvasRenderingContext2D | null | undefined,
-  ) {
-    this.updateBoundariesAfterRotate(centerX, centerY, this.rotate, ctx);
-
+  setRotate(x: number, y: number, centerX: number, centerY: number) {
     const dx = centerX - x;
     const dy = centerY - y;
     const angle = Math.atan2(dy, dx);
     this.rotate = (angle * 180) / Math.PI - 90;
+
+    this.updateBoundariesAfterRotate(this.centerX, this.centerY, this.rotate);
   }
 
   calcTBLR() {
@@ -139,37 +133,34 @@ export class Main {
     centerX: number,
     centerY: number,
     angle1: number,
-    ctx: CanvasRenderingContext2D | null | undefined,
   ) {
-    const rotate = (
-      x: number,
-      y: number,
-      cx: number,
-      cy: number,
-      angle: number,
-    ): [number, number] => [
-      (x - cx) * Math.cos(angle) - (y - cy) * Math.sin(angle) + cx,
-      (x - cx) * Math.sin(angle) + (y - cy) * Math.cos(angle) + cy,
-    ];
     const [width, height] = [this.x2 - this.x, this.y2 - this.y];
     const CX = this.x + width / 2;
     const CY = this.y + height / 2;
-    const [newCenterX, newCenterY] = rotate(
-      CX,
-      CY,
-      centerX,
-      centerY,
-      (angle1 * Math.PI) / 180,
-    );
-    console.log(newCenterX, newCenterY, CX, CY);
+    const cdx = centerX - CX;
+    const cdy = centerY - CY;
+    const cLength = Math.sqrt(cdx * cdx + cdy * cdy);
+    let newCenterX: number;
+    let newCenterY: number;
+    if (CX < centerX) {
+      newCenterX = centerX - cLength * Math.cos((angle1 * Math.PI) / 180);
+    } else {
+      newCenterX = centerX + cLength * Math.cos((angle1 * Math.PI) / 180);
+    }
+    if (CY < centerX) {
+      newCenterY = centerY - cLength * Math.sin((angle1 * Math.PI) / 180);
+    } else {
+      newCenterY = centerY + cLength * Math.sin((angle1 * Math.PI) / 180);
+    }
     const [dx, dy] = [CX - this.x, CY - this.y];
+    const length = Math.sqrt(dx * dx + dy * dy);
     const angle = Math.atan2(dy, dx);
-    const [x, y] = rotate(this.x, this.y, newCenterX, newCenterY, -angle);
-    console.log({ x, y }, this.x, this.y, this.x2, this.y2);
-    // console.log(this.x, this.y);
-    // this.x = x;
-    // this.y = y;
-    // this.x2 = x + width;
-    // this.y2 = y + height;
+    const x = newCenterX - length * Math.cos(angle);
+    const y = newCenterY - length * Math.sin(angle);
+    console.log({ newCenterX, newCenterY, centerX, centerY, x, y });
+    this.x = x;
+    this.y = y;
+    this.x2 = x + width;
+    this.y2 = y + height;
   }
 }

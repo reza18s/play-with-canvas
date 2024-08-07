@@ -176,4 +176,33 @@ export class Selector extends Main {
     ctx?.fill();
     ///////////////////////////////
   }
+  setRotate(x: number, y: number, centerX: number, centerY: number) {
+    const dx = centerX - x;
+    const dy = centerY - y;
+    const angle = Math.atan2(dy, dx);
+    this.rotate = (angle * 180) / Math.PI - 90;
+    this.calcCenter();
+    this.updateBoundariesAfterRotate(this.centerX, this.centerY, this.rotate);
+  }
+  updateBoundariesAfterRotate(
+    centerX: number,
+    centerY: number,
+    angle1: number,
+  ) {
+    const [width, height] = [this.x2 - this.x, this.y2 - this.y];
+    const CX = this.x + width / 2;
+    const CY = this.y + height / 2;
+    const cdx = centerX - CX;
+    const cdy = centerY - CY;
+    const cLength = Math.sqrt(cdx * cdx + cdy * cdy);
+    const newCenterX = centerX - cLength * Math.cos((angle1 * Math.PI) / 180);
+    const newCenterY = centerY - cLength * Math.sin((angle1 * Math.PI) / 180);
+    const [dx, dy] = [CX - this.x, CY - this.y];
+    const length = Math.sqrt(dx * dx + dy * dy);
+    const angle = Math.atan2(dy, dx);
+    const x = newCenterX - length * Math.cos(angle);
+    const y = newCenterY - length * Math.sin(angle);
+    this.resize({ x, y, x2: x + width, y2: y + height });
+    console.log(cdx, cdx);
+  }
 }

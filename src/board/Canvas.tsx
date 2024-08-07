@@ -99,7 +99,6 @@ export default function Canvas({
               event.y,
               selector.centerX,
               selector.centerY,
-              ctx,
             );
             selectedItems.map((item) => {
               item.setRotate(
@@ -107,7 +106,6 @@ export default function Canvas({
                 event.y,
                 selector!.centerX,
                 selector!.centerY,
-                ctx,
               );
             });
           }
