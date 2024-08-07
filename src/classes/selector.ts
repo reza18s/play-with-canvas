@@ -38,21 +38,10 @@ export class Selector extends Main {
     this.calcTBLR();
     return this;
   }
-  setRotate(x: number, y: number) {
-    if (x > this.centerX) {
-      const dx = this.centerX - x;
-      const dy = this.centerY - y;
-      const angle = Math.atan(dy / dx);
-      this.rotate = (angle * 180) / Math.PI + 90;
-    } else if (x < this.centerX) {
-      const dx = x - this.centerX;
-      const dy = y - this.centerY;
-      const angle = Math.atan(dy / dx);
-      this.rotate = (angle * 180) / Math.PI - 90;
-    }
-  }
+
   draw(ctx: CanvasRenderingContext2D | null | undefined) {
     ctx?.save();
+    this.calcCenter();
     ctx?.translate(this.centerX, this.centerY);
     ctx?.rotate((this.rotate * Math.PI) / 180);
     ctx?.translate(-this.centerX, -this.centerY);
@@ -101,6 +90,7 @@ export class Selector extends Main {
   }
   hitDraw(ctx: CanvasRenderingContext2D | null | undefined) {
     ctx?.save();
+    this.calcCenter();
     ctx?.translate(this.centerX, this.centerY);
     ctx?.rotate((this.rotate * Math.PI) / 180);
     ctx?.translate(-this.centerX, -this.centerY);
@@ -159,6 +149,7 @@ export class Selector extends Main {
     ctx: CanvasRenderingContext2D | null | undefined,
     color: string,
   ) {
+    if (!this.show) return this;
     ctx?.beginPath();
     ctx!.strokeStyle = "white";
     ctx!.lineWidth = 1;

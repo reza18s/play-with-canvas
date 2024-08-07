@@ -7,35 +7,30 @@ export const calcSelectorCorners = (selectedItems: ISelectItems) => {
     selector_left = selectedItems[0].corners.left,
     selector_right = selectedItems[0].corners.right;
 
-  selectedItems.map((Item, index) => {
+  selectedItems.map((Item) => {
     // it will check the maximum corners belong to one item and if that true it wont show the selector
-
+    const { top, bottom, left, right } = Item.getBoundaries();
     if (
-      Item.corners.top < selector_top ||
-      Item.corners.bottom > selector_bottom ||
-      Item.corners.left < selector_left ||
-      Item.corners.right > selector_right
+      top < selector_top ||
+      bottom > selector_bottom ||
+      left < selector_left ||
+      right > selector_right
     ) {
       showSelector = true;
     }
-    selector_top =
-      selector_top > Item.corners.top ? Item.corners.top : selector_top;
-    selector_bottom =
-      selector_bottom < Item.corners.bottom
-        ? Item.corners.bottom
-        : selector_bottom;
-    selector_left =
-      selector_left > Item.corners.left ? Item.corners.left : selector_left;
-    selector_right =
-      selector_right < Item.corners.right ? Item.corners.right : selector_right;
+    selector_top = selector_top > top ? top : selector_top;
+    selector_bottom = selector_bottom < bottom ? bottom : selector_bottom;
+    selector_left = selector_left > left ? left : selector_left;
+    selector_right = selector_right < right ? right : selector_right;
     if (
-      Item.corners.top == selector_top &&
-      Item.corners.bottom == selector_bottom &&
-      Item.corners.left == selector_left &&
-      Item.corners.right == selector_right
+      top == selector_top &&
+      bottom == selector_bottom &&
+      left == selector_left &&
+      right == selector_right
     ) {
-      console.log(false);
-      showSelector = false;
+      if (Item.rotate === 0) {
+        showSelector = false;
+      }
     }
   });
   return {

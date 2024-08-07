@@ -23,7 +23,6 @@ export class Ellipse extends Main {
     this.y = mouseMoveY - this.selectY;
     this.x2 = this.x + width;
     this.y2 = this.y + height;
-    this.calcCenter();
     this.calcTBLR();
     return this;
   }
@@ -50,6 +49,10 @@ export class Ellipse extends Main {
     ctx?.beginPath();
     ctx!.strokeStyle = color;
     ctx?.setLineDash([]);
+    this.calcCenter();
+    ctx?.translate(this.centerX, this.centerY);
+    ctx?.rotate((this.rotate * Math.PI) / 180);
+    ctx?.translate(-this.centerX, -this.centerY);
     ctx?.ellipse(
       this.corners.left + (this.corners.right - this.corners.left) / 2,
       this.corners.top + (this.corners.bottom - this.corners.top) / 2,
@@ -66,6 +69,9 @@ export class Ellipse extends Main {
   select(ctx: CanvasRenderingContext2D | null | undefined) {
     ctx?.save();
     ctx?.beginPath();
+    ctx?.translate(this.centerX, this.centerY);
+    ctx?.rotate((this.rotate * Math.PI) / 180);
+    ctx?.translate(-this.centerX, -this.centerY);
     ctx!.strokeStyle = `hsl(160,100%,50%)`;
     ctx!.lineWidth = 1;
     ctx?.setLineDash([5, 10]);

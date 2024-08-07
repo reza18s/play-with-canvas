@@ -45,10 +45,25 @@ export class Main {
       this.y = y;
       this.y2 = this.baseY;
     }
-    this.calcCenter();
+
     this.calcTBLR();
     return this;
   }
+  setRotate(
+    x: number,
+    y: number,
+    centerX: number,
+    centerY: number,
+    ctx: CanvasRenderingContext2D | null | undefined,
+  ) {
+    this.updateBoundariesAfterRotate(centerX, centerY, this.rotate, ctx);
+
+    const dx = centerX - x;
+    const dy = centerY - y;
+    const angle = Math.atan2(dy, dx);
+    this.rotate = (angle * 180) / Math.PI - 90;
+  }
+
   calcTBLR() {
     if (this.x < this.x2) {
       this.corners.left = this.x;
@@ -86,50 +101,75 @@ export class Main {
     this.centerX = this.x + (this.x2 - this.x) / 2;
     this.centerY = this.y + (this.y2 - this.y) / 2;
   }
-  getBoundaries(ctx: CanvasRenderingContext2D | null | undefined) {
+  getBoundaries() {
     const centerX = this.x + (this.x2 - this.x) / 2;
     const centerY = this.y + (this.y2 - this.y) / 2;
     const length = Math.sqrt(
       (this.x2 - this.x) * (this.x2 - this.x) +
         (this.y2 - this.y) * (this.y2 - this.y),
     );
-
     const dx = this.x2 - this.x;
     const dy = this.y2 - this.y;
     const angle = Math.atan(dy / dx);
     // const angleDeg = (angle * 180) / Math.PI;
-
-    const x2 =
-      centerX + (length / 2) * Math.cos(angle + (this.rotate * Math.PI) / 180);
-    const y2 =
-      centerY + (length / 2) * Math.sin(angle + (this.rotate * Math.PI) / 180);
     const x3 =
-      centerX + (length / 2) * Math.cos(-angle + (this.rotate * Math.PI) / 180);
+      centerX + (length / 2) * Math.cos(angle + (this.rotate * Math.PI) / 180);
     const y3 =
+      centerY + (length / 2) * Math.sin(angle + (this.rotate * Math.PI) / 180);
+    const x2 =
+      centerX + (length / 2) * Math.cos(-angle + (this.rotate * Math.PI) / 180);
+    const y2 =
       centerY + (length / 2) * Math.sin(-angle + (this.rotate * Math.PI) / 180);
-    const x4 =
+    const x =
       centerX - (length / 2) * Math.cos(angle + (this.rotate * Math.PI) / 180);
-    const y4 =
+    const y =
       centerY - (length / 2) * Math.sin(angle + (this.rotate * Math.PI) / 180);
-    const x5 =
+    const x4 =
       centerX - (length / 2) * Math.cos(-angle + (this.rotate * Math.PI) / 180);
-    const y5 =
+    const y4 =
       centerY - (length / 2) * Math.sin(-angle + (this.rotate * Math.PI) / 180);
-    ctx?.beginPath();
-    ctx?.moveTo(centerX, centerY);
-    ctx?.lineTo(x2, y2);
-    ctx?.moveTo(centerX, centerY);
-    ctx?.lineTo(x3, y3);
-    ctx?.moveTo(centerX, centerY);
-    ctx?.lineTo(x4, y4);
-    ctx?.moveTo(centerX, centerY);
-    ctx?.lineTo(x5, y5);
-    ctx?.stroke();
     return {
-      top: Math.min(y2, y3, y4, y5),
-      left: Math.min(x2, x3, x4, x5),
-      bottom: Math.max(y2, y3, y4, y5),
-      right: Math.max(x2, x3, x4, x5),
+      top: Math.min(y2, y3, y4, y),
+      left: Math.min(x2, x3, x4, x),
+      bottom: Math.max(y2, y3, y4, y),
+      right: Math.max(x2, x3, x4, x),
     };
+  }
+  updateBoundariesAfterRotate(
+    centerX: number,
+    centerY: number,
+    angle1: number,
+    ctx: CanvasRenderingContext2D | null | undefined,
+  ) {
+    const rotate = (
+      x: number,
+      y: number,
+      cx: number,
+      cy: number,
+      angle: number,
+    ): [number, number] => [
+      (x - cx) * Math.cos(angle) - (y - cy) * Math.sin(angle) + cx,
+      (x - cx) * Math.sin(angle) + (y - cy) * Math.cos(angle) + cy,
+    ];
+    const [width, height] = [this.x2 - this.x, this.y2 - this.y];
+    const CX = this.x + width / 2;
+    const CY = this.y + height / 2;
+    const [newCenterX, newCenterY] = rotate(
+      CX,
+      CY,
+      centerX,
+      centerY,
+      (angle1 * Math.PI) / 180,
+    );
+    console.log(newCenterX, newCenterY, CX, CY);
+    const [dx, dy] = [CX - this.x, CY - this.y];
+    const angle = Math.atan2(dy, dx);
+    const [x, y] = rotate(this.x, this.y, newCenterX, newCenterY, -angle);
+    console.log({ x, y }, this.x, this.y, this.x2, this.y2);
+    // console.log(this.x, this.y);
+    // this.x = x;
+    // this.y = y;
+    // this.x2 = x + width;
+    // this.y2 = y + height;
   }
 }

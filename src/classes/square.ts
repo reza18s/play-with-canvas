@@ -23,9 +23,6 @@ export class Square extends Main {
     this.y = mouseMoveY - this.selectY;
     this.x2 = this.x + width;
     this.y2 = this.y + height;
-    this.centerX = this.x + (this.x2 - this.x) / 2;
-    this.centerY = this.y + (this.y2 - this.y) / 2;
-    this.calcCenter();
     this.calcTBLR();
     return this;
   }
@@ -48,6 +45,7 @@ export class Square extends Main {
   ) {
     ctx?.beginPath();
     ctx?.save();
+    this.calcCenter();
     ctx?.translate(this.centerX, this.centerY);
     ctx?.rotate((this.rotate * Math.PI) / 180);
     ctx?.translate(-this.centerX, -this.centerY);
