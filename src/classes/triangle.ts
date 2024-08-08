@@ -1,10 +1,15 @@
 import { v4 } from "uuid";
 import { Main } from "./main";
 
-export class Ellipse extends Main {
+export class Triangle extends Main {
   readonly id = v4();
   readonly type = "square";
+  selectX: number = 0;
+  selectY: number = 0;
+  selectX2: number = 0;
+  selectY2: number = 0;
   colorId: string = "rgba(0,0,0)";
+
   constructor(
     x: number,
     y: number,
@@ -26,31 +31,24 @@ export class Ellipse extends Main {
     this.drawCanv(ctx, this.colorId);
     return this;
   }
-
   private drawCanv(
     ctx: CanvasRenderingContext2D | null | undefined,
     color: string,
   ) {
-    ctx?.save();
-    const Radius = (this.corners.right - this.corners.left) / 2;
-    const Radius2 = (this.corners.bottom - this.corners.top) / 2;
+    const { bottom, left, right, top } = this.corners;
     ctx?.beginPath();
-    ctx!.strokeStyle = color;
-    ctx?.setLineDash([]);
+    ctx?.save();
     const { cx, cy } = this.calcCenter();
     ctx?.translate(cx, cy);
     ctx?.rotate((this.rotate * Math.PI) / 180);
     ctx?.translate(-cx, -cy);
-    ctx?.ellipse(
-      this.corners.left + (this.corners.right - this.corners.left) / 2,
-      this.corners.top + (this.corners.bottom - this.corners.top) / 2,
-      Radius - 5 < 0 ? 0 : Radius - 5,
-      Radius2 - 5 < 0 ? 0 : Radius2 - 5,
-      Math.PI,
-      0,
-      Math.PI * 2,
-    );
+    ctx!.strokeStyle = color;
+    ctx?.setLineDash([]);
+    ctx?.moveTo(left + right - left, top);
+    ctx?.lineTo(bottom, left);
+    ctx?.lineTo(bottom, right);
     ctx?.stroke();
+
     ctx?.restore();
     return this;
   }

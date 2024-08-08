@@ -1,5 +1,6 @@
 import { Selector } from "../classes/selector";
 import { ICursorIcon, IResize, ISelectItem } from "../types/types";
+import { math } from "./Math";
 
 export const resizeHelper = {
   ResizeGroup: ({
@@ -21,6 +22,7 @@ export const resizeHelper = {
     // const between = (num1: number, bet1: number, bet2: number, ret: number) => {
     //   return num1 < bet1 && num1 > bet2 ? ret : num1;
     // };
+
     selectedItems.map((item) => {
       if (type === "xy") {
         const itemY = (item.selectY - selector!.selectY) * +heightPercent;
@@ -29,16 +31,16 @@ export const resizeHelper = {
         const itemX2 = (selector!.selectX2 - item.selectX2) * +widthPercent;
 
         item.resize({
-          y: selector!.y,
-          y2: selector!.y2,
-          x: selector!.x,
-          x2: selector!.x2,
+          y: selector!.y + itemY,
+          y2: selector!.y2 - itemY2,
+          x: selector!.x + itemX,
+          x2: selector!.x2 - itemX2,
         });
       } else if (type === "x") {
         const itemX = (item.selectX - selector!.selectX) * +widthPercent;
         const itemX2 = (selector!.selectX2 - item.selectX2) * +widthPercent;
         item.resize({
-          x: selector!.x + +itemX,
+          x: selector!.x + itemX,
           x2: selector!.x2 - itemX2,
         });
       } else if (type === "y") {
@@ -94,5 +96,41 @@ export const resizeHelper = {
       cursorType = "col-resize";
     }
     return { selectStates, cursorType };
+  },
+  resizeSingleElement: (
+    event: { x: number; y: number },
+    center: { x: number; y: number },
+    pointA: { x: number; y: number },
+    angle: number,
+  ) => {
+    const rotatedA = math.rotate(
+      pointA.x,
+      pointA.y,
+      center.x,
+      center.y,
+      (angle * Math.PI) / 180,
+    );
+    const newCenter = [
+      (rotatedA[0] + event.x) / 2,
+      (rotatedA[1] + event.y) / 2,
+    ];
+    const newPointA = math.rotate(
+      rotatedA[0],
+      rotatedA[1],
+      newCenter[0],
+      newCenter[1],
+      -(angle * Math.PI) / 180,
+    );
+    const newPointC = math.rotate(
+      event.x,
+      event.y,
+      newCenter[0],
+      newCenter[1],
+      -(angle * Math.PI) / 180,
+    );
+    return {
+      pointA: [newPointA[0], newPointA[1]],
+      pointC: [newPointC[0], newPointC[1]],
+    };
   },
 };

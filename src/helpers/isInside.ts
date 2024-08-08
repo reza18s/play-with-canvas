@@ -22,11 +22,18 @@ export const Inside = {
     } else return false;
   },
   isItemInSelect: (Item: ISelectItem, select: Select) => {
+    const { bottom, left, right, top } = Item.getBoundaries();
+    const {
+      bottom: select_bottom,
+      left: select_left,
+      right: select_right,
+      top: select_top,
+    } = select.corners;
     if (
-      Item.corners.top > select!.corners.top &&
-      Item.corners.left > select!.corners.left &&
-      Item.corners.bottom < select!.corners.bottom &&
-      Item.corners.right < select!.corners.right
+      top > select_top &&
+      left > select_left &&
+      bottom < select_bottom &&
+      right < select_right
     ) {
       return true;
     }

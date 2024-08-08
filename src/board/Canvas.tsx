@@ -40,18 +40,6 @@ export default function Canvas({
   let resize: IResize | "rotate" | null = null;
   let cursorIcon: ICursorIcon;
   const colorIds: { [key: string]: ISelectItem | Selector } = {};
-  function rotate(
-    x: number,
-    y: number,
-    cx: number,
-    cy: number,
-    angle: number,
-  ): [number, number] {
-    return [
-      (x - cx) * Math.cos(angle) - (y - cy) * Math.sin(angle) + cx,
-      (x - cx) * Math.sin(angle) + (y - cy) * Math.cos(angle) + cy,
-    ];
-  }
 
   Hooks.Resize(canv);
   Hooks.useAddEventListener("mousemove", (event: MouseEvent) => {
@@ -91,22 +79,15 @@ export default function Canvas({
     }
     // to handel resize event
     if (getCanvasType() === "move" && resize) {
+      const shouldHaveAspectRatio: boolean =
+        selectedItems.length > 1 ? true : false;
       switch (resize) {
         case "rotate":
           if (selector) {
-            selector.setRotate(
-              event.x,
-              event.y,
-              selector.centerX,
-              selector.centerY,
-            );
+            const { cx, cy } = selector.calcCenter();
+            selector.setRotate(event.x, event.y, cx, cy);
             selectedItems.map((item) => {
-              item.setRotate(
-                event.x,
-                event.y,
-                selector!.centerX,
-                selector!.centerY,
-              );
+              item.setRotate(event.x, event.y, cx, cy);
             });
           }
           break;
@@ -160,184 +141,136 @@ export default function Canvas({
           break;
         case "resize-top-left":
           if (selector) {
-            const cx = selector.x + (selector.x2 - selector.x) / 2;
-            const cy = selector.y + (selector.y2 - selector.y) / 2;
-            const rotatedA = rotate(
-              selector.x2,
-              selector.y2,
-              cx,
-              cy,
-              (selector.rotate * Math.PI) / 180,
+            const { cx, cy } = selector.calcCenter();
+            const { pointA, pointC } = resizeHelper.resizeSingleElement(
+              { x: event.x, y: event.y },
+              { x: cx, y: cy },
+              { x: selector.x2, y: selector.y2 },
+              selector.rotate,
             );
-            const newCenter = [
-              (rotatedA[0] + event.x) / 2,
-              (rotatedA[1] + event.y) / 2,
-            ];
-            const newBottomRight = rotate(
-              rotatedA[0],
-              rotatedA[1],
-              newCenter[0],
-              newCenter[1],
-              -(selector.rotate * Math.PI) / 180,
-            );
-            const newTopLeft = rotate(
-              event.x,
-              event.y,
-              newCenter[0],
-              newCenter[1],
-              -(selector.rotate * Math.PI) / 180,
-            );
+            if (shouldHaveAspectRatio) {
+              const aspectRatio = selector.lastHeight / selector.lastWidth;
+              const [w, h] = [
+                pointA[0] - pointC[0],
+                (pointA[0] - pointC[0]) * aspectRatio,
+              ];
 
-            selectedItems.map((Item) => {
-              console.log("fu");
-              Item.resize({
-                x: newTopLeft[0],
-                y: newTopLeft[1],
-                x2: newBottomRight[0],
-                y2: newBottomRight[1],
-              });
+              selector.x = pointA[0] - w;
+              selector.y = pointA[1] - h;
+              selector.x2 = pointA[0];
+              selector.y2 = pointA[1];
+            } else {
+              selector.x = pointC[0];
+              selector.y = pointC[1];
+              selector.x2 = pointA[0];
+              selector.y2 = pointA[1];
+            }
+            resizeHelper.ResizeGroup({
+              selectedItems,
+              selector,
+              type: "xy",
             });
-            selector.x = newTopLeft[0];
-            selector.y = newTopLeft[1];
-            selector.x2 = newBottomRight[0];
-            selector.y2 = newBottomRight[1];
           }
           break;
         case "resize-top-right":
           if (selector) {
-            console.log((selector.rotate * Math.PI) / 180);
-            const cx = selector.x + (selector.x2 - selector.x) / 2;
-            const cy = selector.y + (selector.y2 - selector.y) / 2;
-            const rotatedA = rotate(
-              selector.x,
-              selector.y2,
-              cx,
-              cy,
-              (selector.rotate * Math.PI) / 180,
+            const { cx, cy } = selector.calcCenter();
+            const { pointA, pointC } = resizeHelper.resizeSingleElement(
+              { x: event.x, y: event.y },
+              { x: cx, y: cy },
+              { x: selector.x, y: selector.y2 },
+              selector.rotate,
             );
-            const newCenter = [
-              (rotatedA[0] + event.x) / 2,
-              (rotatedA[1] + event.y) / 2,
-            ];
-            const newBottomLeft = rotate(
-              rotatedA[0],
-              rotatedA[1],
-              newCenter[0],
-              newCenter[1],
-              -(selector.rotate * Math.PI) / 180,
-            );
-            const newTopRight = rotate(
-              event.x,
-              event.y,
-              newCenter[0],
-              newCenter[1],
-              -(selector.rotate * Math.PI) / 180,
-            );
-            selectedItems.map((Item) => {
-              console.log("fu");
-              Item.resize({
-                x: newBottomLeft[0],
-                y: newTopRight[1],
-                x2: newTopRight[0],
-                y2: newBottomLeft[1],
-              });
+            if (shouldHaveAspectRatio) {
+              const aspectRatio = selector.lastHeight / selector.lastWidth;
+              const [w, h] = [
+                pointC[0] - pointA[0],
+                (pointC[0] - pointA[0]) * aspectRatio,
+              ];
+              console.log(pointC, pointA);
+              selector.x = pointA[0];
+              selector.y = pointA[1] - h;
+              selector.x2 = pointA[0] + w;
+              selector.y2 = pointA[1];
+            } else {
+              selector.x = pointA[0];
+              selector.y = pointC[1];
+              selector.x2 = pointC[0];
+              selector.y2 = pointA[1];
+            }
+            resizeHelper.ResizeGroup({
+              selectedItems,
+              selector,
+              type: "xy",
             });
-            selector.x = newBottomLeft[0];
-            selector.y = newTopRight[1];
-            selector.x2 = newTopRight[0];
-            selector.y2 = newBottomLeft[1];
           }
           break;
         case "resize-bottom-left":
           if (selector) {
-            console.log((selector.rotate * Math.PI) / 180);
-            const cx = selector.x + (selector.x2 - selector.x) / 2;
-            const cy = selector.y + (selector.y2 - selector.y) / 2;
-            const rotatedA = rotate(
-              selector.x2,
-              selector.y,
-              cx,
-              cy,
-              (selector.rotate * Math.PI) / 180,
+            const { cx, cy } = selector.calcCenter();
+            const { pointA, pointC } = resizeHelper.resizeSingleElement(
+              { x: event.x, y: event.y },
+              { x: cx, y: cy },
+              { x: selector.x2, y: selector.y },
+              selector.rotate,
             );
-            const newCenter = [
-              (rotatedA[0] + event.x) / 2,
-              (rotatedA[1] + event.y) / 2,
-            ];
-            const newTopRight = rotate(
-              rotatedA[0],
-              rotatedA[1],
-              newCenter[0],
-              newCenter[1],
-              -(selector.rotate * Math.PI) / 180,
-            );
-            const newBottomLeft = rotate(
-              event.x,
-              event.y,
-              newCenter[0],
-              newCenter[1],
-              -(selector.rotate * Math.PI) / 180,
-            );
-            console.log(newTopRight, newBottomLeft);
-            selectedItems.map((Item) => {
-              console.log("fu");
-              Item.resize({
-                x: newBottomLeft[0],
-                y: newTopRight[1],
-                x2: newTopRight[0],
-                y2: newBottomLeft[1],
-              });
+            if (shouldHaveAspectRatio) {
+              const aspectRatio = selector.lastHeight / selector.lastWidth;
+              const [w, h] = [
+                pointA[0] - pointC[0],
+                (pointA[0] - pointC[0]) * aspectRatio,
+              ];
+              console.log(pointA, pointC);
+              selector.x = pointA[0] - w;
+              selector.y = pointA[1];
+              selector.x2 = pointA[0];
+              selector.y2 = pointA[1] + h;
+            } else {
+              selector.x = pointC[0];
+              selector.y = pointA[1];
+              selector.x2 = pointA[0];
+              selector.y2 = pointC[1];
+            }
+
+            resizeHelper.ResizeGroup({
+              selectedItems,
+              selector,
+              type: "xy",
             });
-            selector.x = newBottomLeft[0];
-            selector.y = newTopRight[1];
-            selector.x2 = newTopRight[0];
-            selector.y2 = newBottomLeft[1];
           }
           break;
         case "resize-bottom-right":
           if (selector) {
-            console.log((selector.rotate * Math.PI) / 180);
-            const cx = selector.x + (selector.x2 - selector.x) / 2;
-            const cy = selector.y + (selector.y2 - selector.y) / 2;
-            const rotatedA = rotate(
-              selector.x,
-              selector.y,
-              cx,
-              cy,
-              (selector.rotate * Math.PI) / 180,
+            const { cx, cy } = selector.calcCenter();
+            const { pointA, pointC } = resizeHelper.resizeSingleElement(
+              { x: event.x, y: event.y },
+              { x: cx, y: cy },
+              { x: selector.x, y: selector.y },
+              selector.rotate,
             );
-            const newCenter = [
-              (rotatedA[0] + event.x) / 2,
-              (rotatedA[1] + event.y) / 2,
-            ];
-            const newTopLeft = rotate(
-              rotatedA[0],
-              rotatedA[1],
-              newCenter[0],
-              newCenter[1],
-              -(selector.rotate * Math.PI) / 180,
-            );
-            const newBottomRight = rotate(
-              event.x,
-              event.y,
-              newCenter[0],
-              newCenter[1],
-              -(selector.rotate * Math.PI) / 180,
-            );
-            selectedItems.map((Item) => {
-              console.log("fu");
-              Item.resize({
-                x: newTopLeft[0],
-                y: newTopLeft[1],
-                x2: newBottomRight[0],
-                y2: newBottomRight[1],
-              });
-            });
 
-            selector.x = newTopLeft[0];
-            selector.y = newTopLeft[1];
-            selector.x2 = newBottomRight[0];
-            selector.y2 = newBottomRight[1];
+            if (shouldHaveAspectRatio) {
+              const aspectRatio = selector.lastHeight / selector.lastWidth;
+              const [w, h] = [
+                pointC[0] - pointA[0],
+                (pointC[0] - pointA[0]) * aspectRatio,
+              ];
+
+              selector.x = pointA[0];
+              selector.y = pointA[1];
+              selector.x2 = pointA[0] + w;
+              selector.y2 = pointA[1] + h;
+            } else {
+              selector.x = pointA[0];
+              selector.y = pointA[1];
+              selector.x2 = pointC[0];
+              selector.y2 = pointC[1];
+            }
+            resizeHelper.ResizeGroup({
+              selectedItems,
+              selector,
+              type: "xy",
+            });
           }
           break;
       }
@@ -412,6 +345,9 @@ export default function Canvas({
               item.selectY = item.y - event.y;
               item.selectX2 = item.x2 - event.x;
               item.selectY2 = item.y2 - event.y;
+              if (selectedItems.length > 1) {
+                item.selectRotate = item.rotate;
+              }
             });
             if (selector) {
               selector.selectX = selector.x - event.x;
@@ -483,7 +419,7 @@ export default function Canvas({
       ).update(selectedItems[0].corners.right, selectedItems[0].corners.bottom);
       selector.rotate = selectedItems[0].rotate;
       selector.show = false;
-    } else if (selectedItems.length > 1 && !selector) {
+    } else if (selectedItems.length > 1) {
       const {
         selector_bottom,
         selector_left,
@@ -511,7 +447,6 @@ export default function Canvas({
     if (Items) {
       Items.map((square) => {
         square.draw(ctx).hitDraw(hitctx);
-        // console.log(square.getBoundaries(ctx));
       });
     }
     selectedItems.map((square) => {

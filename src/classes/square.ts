@@ -4,11 +4,8 @@ import { Main } from "./main";
 export class Square extends Main {
   readonly id = v4();
   readonly type = "square";
-  selectX: number = 0;
-  selectY: number = 0;
-  selectX2: number = 0;
-  selectY2: number = 0;
   colorId: string = "rgba(0,0,0)";
+
   constructor(
     x: number,
     y: number,
@@ -16,16 +13,7 @@ export class Square extends Main {
   ) {
     super(x, y, color);
   }
-  move(mouseMoveX: number, mouseMoveY: number) {
-    const width = this.x2 - this.x;
-    const height = this.y2 - this.y;
-    this.x = mouseMoveX - this.selectX;
-    this.y = mouseMoveY - this.selectY;
-    this.x2 = this.x + width;
-    this.y2 = this.y + height;
-    this.calcTBLR();
-    return this;
-  }
+
   draw(ctx: CanvasRenderingContext2D | null | undefined) {
     ctx!.lineWidth = 1;
     this.drawCanv(
@@ -43,73 +31,21 @@ export class Square extends Main {
     ctx: CanvasRenderingContext2D | null | undefined,
     color: string,
   ) {
+    const { bottom, left, right, top } = this.corners;
     ctx?.beginPath();
     ctx?.save();
-    this.calcCenter();
-    ctx?.translate(this.centerX, this.centerY);
+    const { cx, cy } = this.calcCenter();
+    ctx?.translate(cx, cy);
     ctx?.rotate((this.rotate * Math.PI) / 180);
-    ctx?.translate(-this.centerX, -this.centerY);
+    ctx?.translate(-cx, -cy);
     ctx!.strokeStyle = color;
     ctx?.setLineDash([]);
-    ctx?.roundRect(
-      this.corners.left + 5,
-      this.corners.top + 5,
-      this.corners.right - this.corners.left - 10,
-      this.corners.bottom - this.corners.top - 10,
-      [15],
-    );
+    ctx?.roundRect(left + 5, top + 5, right - left - 10, bottom - top - 10, [
+      15,
+    ]);
     ctx?.stroke();
 
     ctx?.restore();
     return this;
-  }
-  select(ctx: CanvasRenderingContext2D | null | undefined) {
-    ctx?.save();
-    ctx?.beginPath();
-    this.calcCenter();
-    ctx?.translate(this.centerX, this.centerY);
-    ctx?.rotate((this.rotate * Math.PI) / 180);
-    ctx?.translate(-this.centerX, -this.centerY);
-    ctx!.strokeStyle = `hsl(160,100%,50%)`;
-    ctx!.lineWidth = 1;
-    ctx?.setLineDash([5, 10]);
-    ctx?.strokeRect(
-      this.corners.left,
-      this.corners.top,
-      this.corners.right - this.corners.left,
-      this.corners.bottom - this.corners.top,
-    );
-    ctx?.stroke();
-    ctx?.restore();
-    return this;
-  }
-  setRotate(x: number, y: number, centerX: number, centerY: number) {
-    const dx = centerX - x;
-    const dy = centerY - y;
-    const angle = Math.atan2(dy, dx);
-    this.rotate = (angle * 180) / Math.PI - 90;
-    this.calcCenter();
-    this.updateBoundariesAfterRotate(centerX, centerY, this.rotate);
-  }
-  updateBoundariesAfterRotate(
-    centerX: number,
-    centerY: number,
-    angle1: number,
-  ) {
-    const [width, height] = [this.x2 - this.x, this.y2 - this.y];
-    const CX = this.x + width / 2;
-    const CY = this.y + height / 2;
-    const cdx = centerX - CX;
-    const cdy = centerY - CY;
-    const cLength = Math.sqrt(cdx * cdx + cdy * cdy);
-    const newCenterX = centerX - cLength * Math.cos((angle1 * Math.PI) / 180);
-    const newCenterY = centerY - cLength * Math.sin((angle1 * Math.PI) / 180);
-    const [dx, dy] = [CX - this.x, CY - this.y];
-    const length = Math.sqrt(dx * dx + dy * dy);
-    const angle = Math.atan2(dy, dx);
-    const x = newCenterX - length * Math.cos(angle);
-    const y = newCenterY - length * Math.sin(angle);
-    this.resize({ x, y, x2: x + width, y2: y + height });
-    console.log(CX, CY, centerX, centerY);
   }
 }
