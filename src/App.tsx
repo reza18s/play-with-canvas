@@ -30,6 +30,13 @@ export default function App() {
         >
           ellipse
         </button>
+        <button
+          onClick={() => {
+            setCanvasType("triangle");
+          }}
+        >
+          triangle
+        </button>
       </div>
       {canv && <Canvas canv={canv} setCanv={setCanv}></Canvas>}
     </div>

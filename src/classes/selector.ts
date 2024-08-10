@@ -23,35 +23,41 @@ export class Selector extends Main {
     super(x, y, color);
   }
 
+  update(x: number, y: number) {
+    this.x2 = x;
+    this.y2 = y;
+    this.calcTBLR();
+    return this;
+  }
   draw(ctx: CanvasRenderingContext2D | null | undefined) {
     ctx?.save();
     const { cx, cy } = this.calcCenter();
     ctx?.translate(cx, cy);
     ctx?.rotate((this.rotate * Math.PI) / 180);
     ctx?.translate(-cx, -cy);
-    this.selectTool(ctx, "rgb(150,150,150)", this.x - 10, this.y - 10);
+    this.selectTool(ctx, this.colorId, this.x - 10, this.y - 10);
     this.selectTool(
       ctx,
-      "rgb(150,150,180)",
+      this.colorId,
       this.x + this.x2 - this.x - 10,
       this.y - 10,
     );
     this.selectTool(
       ctx,
-      "rgb(150,150,200)",
+      this.colorId,
       this.x - 10,
       this.y + this.y2 - this.y - 10,
     );
     this.selectTool(
       ctx,
-      "rgb(150,70,153)",
+      this.colorId,
       this.x + this.x2 - this.x - 10,
       this.y + this.y2 - this.y - 10,
     );
 
     this.selectTool(
       ctx,
-      "rgb(150,150,154)",
+      this.colorId,
       Math.min(this.x, this.x2) +
         (Math.max(this.x, this.x2) - Math.min(this.x, this.x2)) / 2 -
         10,

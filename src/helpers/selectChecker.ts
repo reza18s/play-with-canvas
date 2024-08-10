@@ -7,17 +7,15 @@ import {
   ISelectItem,
   ISelectItems,
 } from "../types/types";
-import { Inside } from "./isInside";
-import { resizeHelper } from "./resize";
 
 export const SelectChecker = ({
   hitctx,
   event,
-  colorIds,
+  colorsId,
   selectedItems,
   selector,
 }: {
-  colorIds: { [key: string]: ISelectItem | Selector };
+  colorsId: { [key: string]: ISelectItem | Selector };
   hitctx: CanvasRenderingContext2D | null;
   event: MouseEvent;
   selectedItems: ISelectItems;
@@ -34,7 +32,7 @@ export const SelectChecker = ({
     const pixel = hitctx!.getImageData(event.x, event.y, 1, 1).data;
     // console.log(pixel);
     const color = `rgb(${pixel[0]},${pixel[1]},${pixel[2]})`;
-    const Item = colorIds[color];
+    const Item = colorsId[color];
     if (Item) {
       selectStates = "select";
       cursorType = "move";
@@ -52,7 +50,7 @@ export const SelectChecker = ({
       selectStates = "moveMany";
       cursorType = "move";
     } else {
-      const shape = colorIds[color];
+      const shape = colorsId[color];
       if (shape) {
         selectItem = shape as Square;
         selectStates = "select";

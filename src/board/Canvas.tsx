@@ -16,6 +16,8 @@ import { generateColorId } from "../helpers/generateColorId";
 import { Inside } from "../helpers/isInside";
 import { calcSelectorCorners } from "../helpers/calcSelectorCorners";
 import { Ellipse } from "../classes/ellipse";
+import { Triangle } from "../classes/triangle";
+import { useColorsId } from "../store/useColor";
 
 export default function Canvas({
   canv,
@@ -39,13 +41,15 @@ export default function Canvas({
   let move: boolean = false;
   let resize: IResize | "rotate" | null = null;
   let cursorIcon: ICursorIcon;
-  const colorIds: { [key: string]: ISelectItem | Selector } = {};
+  const { colorsId, setColorsId, getColorIs } = useColorsId((state) => state);
 
   Hooks.Resize(canv);
   Hooks.useAddEventListener("mousemove", (event: MouseEvent) => {
     // to update the size off square when the client draws
     if (
-      (getCanvasType() == "square" || getCanvasType() == "ellipse") &&
+      (getCanvasType() == "square" ||
+        getCanvasType() == "ellipse" ||
+        getCanvasType() == "triangle") &&
       Items &&
       isDrawing
     ) {
@@ -58,7 +62,7 @@ export default function Canvas({
       });
       selector?.move(event.x, event.y);
     }
-    // to change the icon off the cursor (it can use to check there is item or not )
+    // // to change the icon off the cursor (it can use to check there is item or not )
     if (getCanvasType() === "move") {
       if (move) {
         document.body.style.cursor = "move";
@@ -67,7 +71,7 @@ export default function Canvas({
       } else {
         const { cursorType } = SelectChecker({
           hitctx,
-          colorIds,
+          colorsId: getColorIs(),
           event,
           selectedItems,
           selector,
@@ -243,12 +247,14 @@ export default function Canvas({
           if (selector) {
             const { cx, cy } = selector.calcCenter();
             const { pointA, pointC } = resizeHelper.resizeSingleElement(
-              { x: event.x, y: event.y },
+              {
+                x: event.x,
+                y: event.y,
+              },
               { x: cx, y: cy },
               { x: selector.x, y: selector.y },
               selector.rotate,
             );
-
             if (shouldHaveAspectRatio) {
               const aspectRatio = selector.lastHeight / selector.lastWidth;
               const [w, h] = [
@@ -282,17 +288,22 @@ export default function Canvas({
     if (getCanvasType() === "square") {
       isDrawing = true;
       newItem = new Square(event.x, event.y, [255, 0, 25]);
-      newItem.colorId = generateColorId(colorIds, newItem);
+      newItem.colorId = generateColorId(newItem, getColorIs(), setColorsId);
     } // to save the position and draw the square
     if (getCanvasType() === "ellipse") {
       isDrawing = true;
       newItem = new Ellipse(event.x, event.y, [255, 0, 25]);
-      newItem.colorId = generateColorId(colorIds, newItem);
+      newItem.colorId = generateColorId(newItem, getColorIs(), setColorsId);
+    }
+    if (getCanvasType() === "triangle") {
+      isDrawing = true;
+      newItem = new Triangle(event.x, event.y, [255, 0, 25]);
+      newItem.colorId = generateColorId(newItem, getColorIs(), setColorsId);
     }
     // to move the item
     if (getCanvasType() === "move") {
       const { selectItem, selectStates, cursorType } = SelectChecker({
-        colorIds,
+        colorsId: getColorIs(),
         hitctx,
         event,
         selectedItems,
@@ -320,16 +331,22 @@ export default function Canvas({
           case "select":
             selectItem!.selectX = event.x - selectItem!.x;
             selectItem!.selectY = event.y - selectItem!.y;
-            move = true;
             selectedItems = [selectItem!];
-            console.log("fuck");
+            move = true;
             selector = new Selector(
-              selectItem!.corners.left,
-              selectItem!.corners.top,
+              Math.min(selectItem!.x2, selectItem!.x),
+              Math.min(selectItem!.y2, selectItem!.y),
               [0, 50, 255],
-            ).update(selectItem!.corners.right, selectItem!.corners.bottom);
-            selector.rotate = selectItem!.rotate;
-            selector.show = false;
+            ).update(
+              Math.max(selectItem!.x2, selectItem!.x),
+              Math.max(selectItem!.y2, selectItem!.y),
+            );
+            if (selector) {
+              selector.selectX = event.x - selector.x;
+              selector.selectY = event.y - selector.y;
+              selector.show = false;
+              selector.rotate = selectItem!.rotate;
+            }
             break;
           case "rotate":
           case "resize-top":
@@ -347,6 +364,8 @@ export default function Canvas({
               item.selectY2 = item.y2 - event.y;
               if (selectedItems.length > 1) {
                 item.selectRotate = item.rotate;
+              } else {
+                item.selectRotate = 0;
               }
             });
             if (selector) {

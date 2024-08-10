@@ -1,13 +1,10 @@
 import { v4 } from "uuid";
 import { Main } from "./main";
 
-export class Triangle extends Main {
+export class Line extends Main {
   readonly id = v4();
-  readonly type = "square";
-  selectX: number = 0;
-  selectY: number = 0;
-  selectX2: number = 0;
-  selectY2: number = 0;
+  readonly type = "line";
+  points: { x: number; y: number; colorId: string }[];
   colorId: string = "rgba(0,0,0)";
 
   constructor(
@@ -16,6 +13,26 @@ export class Triangle extends Main {
     color: [r: number, g: number, b: number, a?: number],
   ) {
     super(x, y, color);
+    this.points = [{ x, y, colorId: "rgba(0,0,0)" }];
+  }
+
+  update(x: number, y: number) {
+    this.points[this.points.length - 1] = {
+      x,
+      y,
+      colorId: this.points[this.points.length - 1].colorId,
+    };
+    return this;
+  }
+  move(mouseMoveX: number, mouseMoveY: number) {
+    const width = this.x2 - this.x;
+    const height = this.y2 - this.y;
+    this.x = mouseMoveX - this.selectX;
+    this.y = mouseMoveY - this.selectY;
+    this.x2 = this.x + width;
+    this.y2 = this.y + height;
+    this.calcTBLR();
+    return this;
   }
 
   draw(ctx: CanvasRenderingContext2D | null | undefined) {
@@ -44,10 +61,9 @@ export class Triangle extends Main {
     ctx?.translate(-cx, -cy);
     ctx!.strokeStyle = color;
     ctx?.setLineDash([]);
-    ctx?.moveTo(left + (right - left) / 2, top);
-    ctx?.lineTo(left + 5, bottom - 5);
-    ctx?.lineTo(right - 5, bottom - 5);
-    ctx?.lineTo(left + (right - left) / 2, top);
+    ctx?.roundRect(left + 5, top + 5, right - left - 10, bottom - top - 10, [
+      15,
+    ]);
     ctx?.stroke();
 
     ctx?.restore();
